@@ -2,12 +2,11 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Image from 'next/image';
-import { Heart, ArrowRight } from 'lucide-react';
+import { Heart, ArrowRight, ChevronDown } from 'lucide-react';
 
 interface VideoHeroProps {
-  videoUrl: string;
-  title: string;
+  videoUrl?: string;
+  title?: string;
   subtitle?: string;
   description?: string;
   ctaText?: string;
@@ -15,7 +14,15 @@ interface VideoHeroProps {
   thumbnailUrl?: string;
 }
 
+const stats = [
+  { value: '49', label: 'Beds' },
+  { value: '15+', label: 'Vehicles' },
+  { value: '40', label: 'Dialysis' },
+  { value: '₹0', label: 'Bills' },
+];
+
 export default function VideoHero({
+  videoUrl,
   title,
   subtitle,
   description,
@@ -26,197 +33,253 @@ export default function VideoHero({
   return (
     <section
       className="relative w-full overflow-hidden flex flex-col"
-      style={{ background: '#001a52', minHeight: '100vh' }}
+      style={{ minHeight: '100svh', background: '#050e24' }}
     >
-      {/* Topographic contour lines */}
-      <svg
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        viewBox="0 0 1400 800"
-        preserveAspectRatio="xMidYMid slice"
-        style={{ zIndex: 1 }}
+      {/* ── Full-screen video background ── */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        poster={thumbnailUrl || '/image/hero.jpeg'}
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ zIndex: 0 }}
       >
-        <g fill="none" stroke="rgba(100,160,220,0.18)" strokeWidth="1.2">
-          <path d="M-50 580 Q180 510 350 555 Q520 600 700 520 Q850 460 1050 490 Q1200 515 1450 475" />
-          <path d="M-50 620 Q160 548 340 595 Q530 642 710 558 Q875 490 1080 524 Q1230 548 1450 510" />
-          <path d="M-50 660 Q140 590 330 635 Q540 680 720 596 Q900 525 1100 558 Q1260 582 1450 545" />
-          <path d="M-50 700 Q120 628 320 672 Q555 718 730 634 Q925 560 1120 592 Q1290 615 1450 578" />
-          <path d="M-50 540 Q200 468 370 514 Q510 556 690 478 Q830 425 1020 455 Q1175 480 1450 440" />
-          <path d="M-50 500 Q220 428 390 474 Q495 510 675 438 Q810 388 1000 420 Q1150 444 1450 406" />
-          <path d="M-50 460 Q240 390 410 435 Q480 464 660 398 Q790 352 980 385 Q1130 410 1450 372" />
-          <path d="M350 -20 Q390 120 420 280 Q450 440 410 600 Q380 720 360 820" />
-          <path d="M390 -20 Q435 125 465 288 Q498 455 455 615 Q422 738 400 820" />
-          <path d="M430 -20 Q480 130 512 295 Q546 468 500 630 Q464 754 440 820" />
-          <path d="M310 -20 Q345 115 372 272 Q400 425 365 582 Q338 702 320 820" />
-        </g>
-      </svg>
+        <source src={videoUrl || '/video/hero.mp4'} type="video/mp4" />
+      </video>
 
-      {/* Right photo panel */}
+      {/* ── Navy gradient overlay ── */}
       <div
-        className="absolute top-0 right-0 h-full pointer-events-none"
-        style={{ width: '58%', zIndex: 2 }}
-      >
-        <Image
-          src={thumbnailUrl || '/image/hero.jpeg'}
-          alt="Shanthibhavan Palliative Care"
-          fill
-          className="object-cover"
-          style={{ objectPosition: 'left center' }}
-          priority
-        />
-        {/* Left-edge gradient blend */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(to right, #001a52 0%, rgba(0,26,82,0.85) 12%, rgba(0,26,82,0.40) 30%, rgba(0,26,82,0.08) 58%, transparent 100%)',
-          }}
-        />
-        {/* Bottom gradient */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              'linear-gradient(to top, rgba(0,26,82,0.55) 0%, transparent 30%)',
-          }}
-        />
-      </div>
+        className="absolute inset-0"
+        style={{
+          zIndex: 1,
+          background:
+            'linear-gradient(to bottom, rgba(5,14,36,0.68) 0%, rgba(5,14,36,0.50) 50%, rgba(5,14,36,0.72) 100%)',
+        }}
+      />
 
-      {/* Main content */}
+      {/* ── Main content (flex-col, centered, fills viewport) ── */}
       <div
-        className="relative flex flex-col justify-center"
+        className="relative flex flex-col items-center justify-center flex-1"
         style={{
           zIndex: 10,
-          paddingLeft: 'clamp(24px, 8%, 120px)',
-          paddingRight: 'clamp(24px, 4%, 60px)',
-          paddingTop: '160px',
-          paddingBottom: '100px',
-          minHeight: '100vh',
-          maxWidth: '680px',
+          minHeight: '100svh',
+          paddingTop: 'clamp(90px, 14vh, 140px)',
+          paddingBottom: 'clamp(100px, 15vh, 150px)',
+          paddingLeft: 'clamp(20px, 6%, 80px)',
+          paddingRight: 'clamp(20px, 6%, 80px)',
         }}
       >
-        {/* Eyebrow */}
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          style={{
-            color: 'rgba(180,210,240,0.75)',
-            fontSize: '15px',
-            fontWeight: 300,
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            marginBottom: '22px',
-          }}
-        >
-          {subtitle || 'A Charitable, Non-Billing Facility'}
-        </motion.p>
+        {/* Center content block */}
+        <div className="flex flex-col items-center text-center max-w-3xl w-full">
 
-        {/* Heading */}
-        <motion.h1
-          initial={{ opacity: 0, y: 28 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.75, delay: 0.25 }}
-          style={{
-            fontFamily: 'var(--font-playfair, Georgia, serif)',
-            fontSize: 'clamp(2.8rem, 5vw, 5.1rem)',
-            fontWeight: 'normal',
-            lineHeight: 1.02,
-            color: '#ffffff',
-            marginBottom: '28px',
-          }}
-        >
-          {title}
-        </motion.h1>
+          {/* Eyebrow badge pill */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.1 }}
+            className="mb-6"
+          >
+            <span
+              style={{
+                display: 'inline-block',
+                background: 'rgba(255,255,255,0.12)',
+                border: '1px solid rgba(255,255,255,0.25)',
+                color: '#ffffff',
+                borderRadius: '999px',
+                padding: '5px 18px',
+                fontSize: '11px',
+                fontFamily: 'var(--font-space-grotesk, sans-serif)',
+                fontWeight: 500,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+              }}
+            >
+              {subtitle || "India's First No-Bill Hospital"}
+            </span>
+          </motion.div>
 
-        {/* Description */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.45 }}
-          style={{
-            color: 'rgba(200,220,245,0.72)',
-            fontSize: '15px',
-            fontWeight: 300,
-            lineHeight: 1.8,
-            maxWidth: '480px',
-            marginBottom: '44px',
-          }}
-        >
-          {description ||
-            'Providing world-class medical support and comfort for those facing serious illness. All services at zero cost to patients — because compassion has no price.'}
-        </motion.p>
-
-        {/* Buttons */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.62 }}
-          className="flex flex-wrap gap-4"
-        >
-          <Link
-            href="/services"
-            className="inline-flex items-center gap-2 font-semibold transition-all duration-200 hover:brightness-110 hover:-translate-y-0.5"
+          {/* Heading */}
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.25 }}
             style={{
-              background: '#1a7070',
+              fontFamily: 'var(--font-playfair, Georgia, serif)',
+              fontSize: 'clamp(2.4rem, 5.5vw, 5rem)',
+              fontWeight: 'normal',
+              lineHeight: 1.08,
               color: '#ffffff',
-              borderRadius: '50px',
-              padding: '17px 42px',
-              fontSize: '15px',
-              letterSpacing: '0.02em',
+              marginBottom: '20px',
             }}
           >
-            Our Services
-            <ArrowRight className="w-4 h-4" />
-          </Link>
+            {title || (
+              <>
+                For the People,
+                <br />
+                By the People
+              </>
+            )}
+          </motion.h1>
 
-          {ctaText && ctaLink ? (
-            <Link
-              href={ctaLink}
-              className="inline-flex items-center gap-2 font-semibold transition-all duration-200 hover:bg-white/10 hover:-translate-y-0.5"
+          {/* White divider */}
+          <motion.div
+            initial={{ scaleX: 0, opacity: 0 }}
+            animate={{ scaleX: 1, opacity: 1 }}
+            transition={{ duration: 0.55, delay: 0.45 }}
+            style={{ transformOrigin: 'center', marginBottom: '22px' }}
+          >
+            <div
               style={{
-                border: '1.5px solid rgba(255,255,255,0.45)',
+                width: '56px',
+                height: '1.5px',
+                background: 'rgba(255,255,255,0.55)',
+              }}
+            />
+          </motion.div>
+
+          {/* Description */}
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.55 }}
+            style={{
+              color: 'rgba(220,230,245,0.75)',
+              fontSize: 'clamp(14px, 1.6vw, 16px)',
+              fontFamily: 'var(--font-space-grotesk, sans-serif)',
+              fontWeight: 300,
+              lineHeight: 1.85,
+              marginBottom: '40px',
+              maxWidth: '560px',
+            }}
+          >
+            {description ||
+              'Providing world-class medical support and comfort for those facing serious illness. All services at zero cost to patients — because compassion has no price.'}
+          </motion.p>
+
+          {/* Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.68 }}
+            className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto items-stretch sm:items-center justify-center"
+          >
+            <Link
+              href="/services"
+              className="inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 hover:-translate-y-0.5 active:scale-[0.98] w-full sm:w-auto"
+              style={{
+                background: '#ffffff',
+                color: '#050e24',
+                borderRadius: '3px',
+                padding: '14px 32px',
+                fontSize: '13px',
+                fontFamily: 'var(--font-space-grotesk, sans-serif)',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Our Services
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+
+            <Link
+              href={ctaLink || '/donate'}
+              className="inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 hover:bg-white/10 hover:-translate-y-0.5 active:scale-[0.98] w-full sm:w-auto"
+              style={{
+                border: '1.5px solid rgba(255,255,255,0.60)',
                 color: '#ffffff',
-                borderRadius: '50px',
-                padding: '17px 42px',
-                fontSize: '15px',
-                letterSpacing: '0.02em',
+                borderRadius: '3px',
+                padding: '14px 32px',
+                fontSize: '13px',
+                fontFamily: 'var(--font-space-grotesk, sans-serif)',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
               }}
             >
               <Heart className="w-4 h-4" />
-              {ctaText}
+              {ctaText || 'Donate Now'}
             </Link>
-          ) : (
-            <Link
-              href="/donate"
-              className="inline-flex items-center gap-2 font-semibold transition-all duration-200 hover:bg-white/10 hover:-translate-y-0.5"
-              style={{
-                border: '1.5px solid rgba(255,255,255,0.45)',
-                color: '#ffffff',
-                borderRadius: '50px',
-                padding: '17px 42px',
-                fontSize: '15px',
-                letterSpacing: '0.02em',
-              }}
-            >
-              <Heart className="w-4 h-4" />
-              Support Our Mission
-            </Link>
-          )}
+          </motion.div>
+        </div>
+
+        {/* ── Stats strip (pinned to bottom via mt-auto) ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.88 }}
+          className="mt-auto w-full"
+          style={{ paddingTop: '48px' }}
+        >
+          <div
+            className="grid grid-cols-2 md:grid-cols-4 w-full"
+            style={{
+              background: 'rgba(5,14,36,0.60)',
+              borderTop: '1px solid rgba(255,255,255,0.12)',
+              backdropFilter: 'blur(8px)',
+            }}
+          >
+            {stats.map((stat, i) => (
+              <div
+                key={stat.label}
+                className="flex flex-col items-center justify-center py-5 px-4"
+                style={{
+                  borderRight:
+                    i < stats.length - 1 ? '1px solid rgba(255,255,255,0.10)' : 'none',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: 'var(--font-playfair, Georgia, serif)',
+                    fontSize: 'clamp(1.4rem, 2.4vw, 1.9rem)',
+                    fontWeight: 700,
+                    color: '#ffffff',
+                    lineHeight: 1,
+                  }}
+                >
+                  {stat.value}
+                </span>
+                <span
+                  style={{
+                    fontSize: '10px',
+                    fontFamily: 'var(--font-space-grotesk, sans-serif)',
+                    color: 'rgba(200,220,245,0.55)',
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    marginTop: '6px',
+                    textAlign: 'center',
+                  }}
+                >
+                  {stat.label}
+                </span>
+              </div>
+            ))}
+          </div>
         </motion.div>
       </div>
 
-      {/* Sparkle decoration */}
-      <div
-        className="absolute pointer-events-none"
-        style={{ bottom: '26px', right: '30px', opacity: 0.55, zIndex: 10 }}
+      {/* ── Scroll indicator (desktop only) ── */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 1.3, duration: 0.6 }}
+        className="absolute bottom-24 left-1/2 -translate-x-1/2 hidden md:flex flex-col items-center gap-1"
+        style={{ zIndex: 10 }}
       >
-        <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-          <path
-            d="M15 2L16.8 13.2L28 15L16.8 16.8L15 28L13.2 16.8L2 15L13.2 13.2L15 2Z"
-            fill="white"
-          />
-        </svg>
-      </div>
+        <span
+          style={{
+            fontSize: '9px',
+            fontFamily: 'var(--font-space-grotesk, sans-serif)',
+            color: 'rgba(255,255,255,0.35)',
+            letterSpacing: '0.22em',
+            textTransform: 'uppercase',
+          }}
+        >
+          Scroll
+        </span>
+        <motion.div animate={{ y: [0, 5, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}>
+          <ChevronDown style={{ width: '15px', height: '15px', color: 'rgba(255,255,255,0.35)' }} />
+        </motion.div>
+      </motion.div>
     </section>
   );
 }
