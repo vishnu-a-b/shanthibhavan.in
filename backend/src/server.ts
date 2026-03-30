@@ -60,33 +60,33 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/public', express.static(path.join(__dirname, '../public')));
 
 // Routes - Operations
-app.use('/api/banner', bannerRoutes);
-app.use('/api/payment', paymentRoutes);
-app.use('/api/volunteer', volunteerRoutes);
-app.use('/api/contact', contactRoutes);
-app.use('/api/stats', statsRoutes);
+app.use('/v1/api/banner', bannerRoutes);
+app.use('/v1/api/payment', paymentRoutes);
+app.use('/v1/api/volunteer', volunteerRoutes);
+app.use('/v1/api/contact', contactRoutes);
+app.use('/v1/api/stats', statsRoutes);
 
 // Routes - CMS Content
-app.use('/api/about', aboutRoutes);
-app.use('/api/about-image', aboutImageRoutes);
-app.use('/api/services', serviceRoutes);
-app.use('/api/services-page', servicesPageRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/awards', awardRoutes);
-app.use('/api/news-events', newsEventRoutes);
-app.use('/api/team', teamMemberRoutes);
-app.use('/api/homepage', homeSectionRoutes);
-app.use('/api/benevity', benevityRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/donation', donationRoutes);
-app.use('/api/fellowship', fellowshipRoutes);
-app.use('/api/campaign', campaignRoutes);
-app.use('/api/footer', footerRoutes);
-app.use('/api/upload', uploadRoutes);
-app.use('/api/gallery', galleryRoutes);
+app.use('/v1/api/about', aboutRoutes);
+app.use('/v1/api/about-image', aboutImageRoutes);
+app.use('/v1/api/services', serviceRoutes);
+app.use('/v1/api/services-page', servicesPageRoutes);
+app.use('/v1/api/projects', projectRoutes);
+app.use('/v1/api/awards', awardRoutes);
+app.use('/v1/api/news-events', newsEventRoutes);
+app.use('/v1/api/team', teamMemberRoutes);
+app.use('/v1/api/homepage', homeSectionRoutes);
+app.use('/v1/api/benevity', benevityRoutes);
+app.use('/v1/api/admin', adminRoutes);
+app.use('/v1/api/donation', donationRoutes);
+app.use('/v1/api/fellowship', fellowshipRoutes);
+app.use('/v1/api/campaign', campaignRoutes);
+app.use('/v1/api/footer', footerRoutes);
+app.use('/v1/api/upload', uploadRoutes);
+app.use('/v1/api/gallery', galleryRoutes);
 
 // Health check route
-app.get('/api/health', (_req: Request, res: Response): void => {
+app.get('/v1/api/health', (_req: Request, res: Response): void => {
   res.json({ status: 'OK', message: 'Backend server is running' });
 });
 
