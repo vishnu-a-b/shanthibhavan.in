@@ -6,3 +6,14 @@ client/node_modules/
 client/dist/
 client/.next/
 .next/
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+backend/.env
+client/.env
+client/.env.local
+client/.env.production
+
