@@ -1,0 +1,110 @@
+{
+  "node": {
+    "0009164cbee036f745a9b1500bcc47c279ae4b75db": {
+      "workers": {
+        "app/(admin-panel)/admin/services/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin-panel)/admin/services/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin-panel)/admin/login/actions.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/cms/services.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/app/actions/servicesPage.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/(admin-panel)/admin/login/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin-panel)/admin/services/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/(admin-panel)/admin/login/actions.ts"
+    },
+    "00a05cc030add4ec0ac42c658a9fa963203ac821a4": {
+      "workers": {
+        "app/(admin-panel)/admin/services/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin-panel)/admin/services/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin-panel)/admin/login/actions.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/cms/services.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/app/actions/servicesPage.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getServices",
+          "filename": "app/actions/cms/services.ts"
+        }
+      },
+      "layer": {
+        "app/(admin-panel)/admin/services/page": "action-browser"
+      },
+      "exportedName": "getServices",
+      "filename": "app/actions/cms/services.ts"
+    },
+    "40bb492b1d9c3a413efa17c442b1ac6a9d0d1f23a3": {
+      "workers": {
+        "app/(admin-panel)/admin/services/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin-panel)/admin/services/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin-panel)/admin/login/actions.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/cms/services.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/app/actions/servicesPage.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "createService",
+          "filename": "app/actions/cms/services.ts"
+        }
+      },
+      "layer": {
+        "app/(admin-panel)/admin/services/page": "action-browser"
+      },
+      "exportedName": "createService",
+      "filename": "app/actions/cms/services.ts"
+    },
+    "609c149344625081037002289206e58362596eeba8": {
+      "workers": {
+        "app/(admin-panel)/admin/services/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin-panel)/admin/services/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin-panel)/admin/login/actions.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/cms/services.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/app/actions/servicesPage.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateService",
+          "filename": "app/actions/cms/services.ts"
+        }
+      },
+      "layer": {
+        "app/(admin-panel)/admin/services/page": "action-browser"
+      },
+      "exportedName": "updateService",
+      "filename": "app/actions/cms/services.ts"
+    },
+    "402ba7b0e2d337a811505c5fa93c790559d66b792e": {
+      "workers": {
+        "app/(admin-panel)/admin/services/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin-panel)/admin/services/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin-panel)/admin/login/actions.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/cms/services.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/app/actions/servicesPage.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "deleteService",
+          "filename": "app/actions/cms/services.ts"
+        }
+      },
+      "layer": {
+        "app/(admin-panel)/admin/services/page": "action-browser"
+      },
+      "exportedName": "deleteService",
+      "filename": "app/actions/cms/services.ts"
+    },
+    "00541f274a22786a1b78d247dc1265b31e7ebfecd6": {
+      "workers": {
+        "app/(admin-panel)/admin/services/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin-panel)/admin/services/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin-panel)/admin/login/actions.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/cms/services.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/app/actions/servicesPage.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "getServicesPageContent",
+          "filename": "app/actions/servicesPage.ts"
+        }
+      },
+      "layer": {
+        "app/(admin-panel)/admin/services/page": "action-browser"
+      },
+      "exportedName": "getServicesPageContent",
+      "filename": "app/actions/servicesPage.ts"
+    },
+    "409aae20ca2958e47ceb20c3ceef1beb05a1d3dc55": {
+      "workers": {
+        "app/(admin-panel)/admin/services/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin-panel)/admin/services/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin-panel)/admin/login/actions.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE1 => \"[project]/app/actions/cms/services.ts [app-rsc] (ecmascript)\", ACTIONS_MODULE2 => \"[project]/app/actions/servicesPage.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "updateServicesPageContent",
+          "filename": "app/actions/servicesPage.ts"
+        }
+      },
+      "layer": {
+        "app/(admin-panel)/admin/services/page": "action-browser"
+      },
+      "exportedName": "updateServicesPageContent",
+      "filename": "app/actions/servicesPage.ts"
+    }
+  },
+  "edge": {}
+}

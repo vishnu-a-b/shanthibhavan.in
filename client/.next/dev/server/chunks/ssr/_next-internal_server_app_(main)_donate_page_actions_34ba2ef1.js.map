@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///media/vishnu/Official/SbTCR/client/.next-internal/server/app/%28main%29/donate/page/actions.js%20%28server%20actions%20loader%29"],"sourcesContent":["export {getFooterContent as '0065cae8ab74ad197064d579babe5f43b7912d1951'} from 'ACTIONS_MODULE0'\nexport {seedFooterContent as '00c9f85ed693c7a74fbc0ab7948ac5446149f71818'} from 'ACTIONS_MODULE0'\nexport {updateFooterContent as '4075419c60a8766877128bc636a7b8e0cd4c8fe33a'} from 'ACTIONS_MODULE0'\n"],"names":[],"mappings":";AAAA"}}]
+}

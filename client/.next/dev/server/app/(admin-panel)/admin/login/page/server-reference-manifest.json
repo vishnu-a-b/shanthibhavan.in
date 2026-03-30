@@ -1,0 +1,35 @@
+{
+  "node": {
+    "0009164cbee036f745a9b1500bcc47c279ae4b75db": {
+      "workers": {
+        "app/(admin-panel)/admin/login/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin-panel)/admin/login/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin-panel)/admin/login/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "logout",
+          "filename": "app/(admin-panel)/admin/login/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin-panel)/admin/login/page": "action-browser"
+      },
+      "exportedName": "logout",
+      "filename": "app/(admin-panel)/admin/login/actions.ts"
+    },
+    "4062f9731f1c31117ad64059214d2b83c9dfa03dfc": {
+      "workers": {
+        "app/(admin-panel)/admin/login/page": {
+          "moduleId": "[project]/.next-internal/server/app/(admin-panel)/admin/login/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/(admin-panel)/admin/login/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "login",
+          "filename": "app/(admin-panel)/admin/login/actions.ts"
+        }
+      },
+      "layer": {
+        "app/(admin-panel)/admin/login/page": "action-browser"
+      },
+      "exportedName": "login",
+      "filename": "app/(admin-panel)/admin/login/actions.ts"
+    }
+  },
+  "edge": {}
+}

@@ -1,0 +1,226 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Plus, Edit, Trash2, Eye, EyeOff, ImageIcon, Heart } from 'lucide-react';
+import ProjectForm from '@/components/admin/ProjectForm';
+import { getProjects, createProject, updateProject, deleteProject } from '@/app/actions/cms/projects';
+
+interface FeaturedProject {
+  _id: string;
+  projectName: string;
+  shortDescription: string;
+  fullDescription: string;
+  featuredImage: string;
+  gallery: string[];
+  priority: number;
+  isActive: boolean;
+  startDate: Date;
+  expiryDate: Date;
+  showOnFirstFace: boolean;
+  showOnSecondFace: boolean;
+  showOnBenevity: boolean;
+  link?: string;
+}
+
+export default function BenevityProjectsAdminPage() {
+  const [projects, setProjects] = useState<FeaturedProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<FeaturedProject | null>(null);
+
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const fetchProjects = async () => {
+    try {
+      setLoading(true);
+      // Hardcode showOnBenevity: true and mode: 'admin'
+      const data = await getProjects({ 
+          showOnBenevity: true, 
+          mode: 'admin' 
+      });
+      setProjects(data);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      setLoading(false);
+    }
+  };
+
+  const handleSave = async (data: any) => {
+    try {
+      // Force Benevity flag
+      data.showOnBenevity = true;
+
+      if (editingProject) {
+        // Pass true for isBenevity flag
+        await updateProject(editingProject._id, data, true);
+      } else {
+        // Pass true for isBenevity flag
+        await createProject(data, true);
+      }
+      setShowForm(false);
+      setEditingProject(null);
+      fetchProjects();
+    } catch (error) {
+      console.error('Error saving project:', error);
+      alert('Failed to save project');
+    }
+  };
+
+  const handleEdit = (project: FeaturedProject) => {
+    setEditingProject(project);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this project?')) return;
+    try {
+      // Pass true for isBenevity flag
+      await deleteProject(id, true);
+      fetchProjects();
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      alert('Failed to delete project');
+    }
+  };
+
+  return (
+    <div className="p-8">
+      {showForm && (
+        <ProjectForm
+          project={editingProject}
+          onClose={() => {
+            setShowForm(false);
+            setEditingProject(null);
+          }}
+          onSave={handleSave}
+        />
+      )}
+
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <div className="flex items-center gap-2 text-primary mb-2">
+            <Heart className="w-6 h-6" />
+            <h1 className="text-3xl font-bold text-gray-900">Benevity Projects</h1>
+          </div>
+          <p className="text-gray-600">
+            Manage projects shown specifically on the Benevity landing page. These are distinct from the main website projects.
+          </p>
+        </div>
+        <button
+          onClick={() => setShowForm(true)}
+          className="bg-primary text-white px-6 py-3 rounded-lg hover:bg-primary/90 flex items-center gap-2 transition-all shadow-lg hover:shadow-xl"
+        >
+          <Plus className="w-5 h-5" />
+          Add Benevity Project
+        </button>
+      </div>
+
+      {/* Projects Table */}
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-gray-50 border-b">
+            <tr>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Priority</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Project</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Link</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Status</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Dates</th>
+              <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {loading ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  Loading projects...
+                </td>
+              </tr>
+            ) : projects.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                  No projects found. Click "Add Benevity Project" to create one.
+                </td>
+              </tr>
+            ) : (
+              projects.map((project) => (
+                <tr key={project._id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4">
+                    <span className="font-semibold text-primary">{project.priority}</span>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-3">
+                      {project.featuredImage ? (
+                        <img src={project.featuredImage} alt={project.projectName} className="w-12 h-12 rounded-lg object-cover" />
+                      ) : (
+                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <ImageIcon className="w-6 h-6 text-gray-400" />
+                        </div>
+                      )}
+                      <div>
+                        <div className="font-medium text-gray-900">{project.projectName}</div>
+                        <div className="text-sm text-gray-500 truncate max-w-xs">{project.shortDescription}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    {project.link ? (
+                      <a 
+                        href={project.link} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-xs text-blue-600 hover:underline max-w-[200px] truncate block"
+                      >
+                        {project.link}
+                      </a>
+                    ) : (
+                      <span className="text-xs text-gray-400">None</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4">
+                    {project.isActive ? (
+                      <span className="flex items-center gap-1 text-green-600 text-sm">
+                        <Eye className="w-4 h-4" />
+                        Active
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-gray-400 text-sm">
+                        <EyeOff className="w-4 h-4" />
+                        Inactive
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-xs text-gray-500">
+                    <div>{new Date(project.startDate).toLocaleDateString()}</div>
+                    <div className="font-semibold text-gray-400">to</div>
+                    <div>{new Date(project.expiryDate).toLocaleDateString()}</div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEdit(project)}
+                        className="p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit"
+                      >
+                        <Edit className="w-4 h-4 text-blue-600" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(project._id)}
+                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4 text-red-600" />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
