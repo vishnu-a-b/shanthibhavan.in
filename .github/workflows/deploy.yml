@@ -104,7 +104,7 @@ jobs:
               docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
             # Pull new images
-            IMAGE_TAG=${{ needs.build.outputs.image_tag }}
+            export IMAGE_TAG=${{ needs.build.outputs.image_tag }}
             docker pull ghcr.io/${{ github.repository_owner }}/sbtcr-backend:${IMAGE_TAG}
             docker pull ghcr.io/${{ github.repository_owner }}/sbtcr-frontend:${IMAGE_TAG}
 
@@ -114,8 +114,12 @@ jobs:
             docker tag ghcr.io/${{ github.repository_owner }}/sbtcr-frontend:${IMAGE_TAG} \
                        ghcr.io/${{ github.repository_owner }}/sbtcr-frontend:latest
 
-            # Rolling restart with zero-downtime
-            IMAGE_TAG=${IMAGE_TAG} docker compose up -d --no-build
+            # Rolling restart — support both docker compose (v2) and docker-compose (v1)
+            if docker compose version > /dev/null 2>&1; then
+              docker compose up -d --no-build
+            else
+              docker-compose up -d --no-build
+            fi
 
             # Remove dangling images
             docker image prune -f
