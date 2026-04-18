@@ -39,14 +39,16 @@ export default function Navbar() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
-            <img src="/logo/logo.png" alt="Shanthibhavan Logo" className="h-11 w-auto" />
-            <span className="text-lg font-bold hidden md:inline-block tracking-tight">
+            <div className="bg-white rounded-xl px-2 py-1 flex items-center">
+              <img src="/logo/logo.png" alt="Shanthibhavan Logo" className="h-11 w-auto" />
+            </div>
+            {/* <span className="text-lg font-bold hidden md:inline-block tracking-tight">
               <span className="text-white">Shanthi</span>
               <span style={{ color: '#a8c8e8' }}>bhavan</span>
             </span>
             <span className="text-lg font-bold md:hidden text-white tracking-tight">
               Shanthibhavan
-            </span>
+            </span> */}
           </Link>
 
           {/* Desktop Nav */}

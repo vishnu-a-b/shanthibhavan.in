@@ -7,6 +7,8 @@ interface BannerRequestBody {
   title?: string;
   description?: string;
   subtitle?: string;
+  tagline?: string;
+  taglineDescription?: string;
   mediaType?: 'image' | 'video';
   imageUrl?: string;
   videoUrl?: string;
