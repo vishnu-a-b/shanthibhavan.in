@@ -80,6 +80,7 @@ const menuItems: MenuItem[] = [
 
   // CMS Content Management - Super Admin Only
   { icon: Home, label: 'Homepage Sections', href: '/admin/homepage', category: 'cms', roles: ['super_admin'] },
+  { icon: Settings, label: 'Homepage Settings', href: '/admin/homepage-settings', category: 'cms', roles: ['super_admin'] },
   { icon: Video, label: 'Hero Banners', href: '/admin/banners', category: 'cms', roles: ['super_admin'] },
   { icon: Info, label: 'About Us', href: '/admin/about', category: 'cms', roles: ['super_admin'] },
   { icon: ListOrdered, label: 'Services', href: '/admin/services', category: 'cms', roles: ['super_admin'] },

@@ -4,6 +4,8 @@ export interface IBannerDocument extends Document {
   title: string;
   description?: string;
   subtitle?: string;
+  tagline?: string;
+  taglineDescription?: string;
   mediaType: 'image' | 'video';
   imageUrl?: string;
   videoUrl?: string;
@@ -21,6 +23,8 @@ const BannerSchema = new Schema<IBannerDocument>({
   title: { type: String, required: true },
   description: { type: String },
   subtitle: { type: String },
+  tagline: { type: String },
+  taglineDescription: { type: String },
   mediaType: { type: String, enum: ['image', 'video'], default: 'image' },
   imageUrl: { type: String },
   videoUrl: { type: String },

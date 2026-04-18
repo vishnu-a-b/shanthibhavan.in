@@ -8,6 +8,8 @@ interface BannerFormData {
   title: string;
   subtitle: string;
   description: string;
+  tagline: string;
+  taglineDescription: string;
   mediaType: 'image' | 'video';
   imageUrl: string;
   videoUrl: string;
@@ -34,6 +36,8 @@ export default function BannerForm({ banner, defaultLocation = 'home', onClose, 
     title: banner?.title || '',
     subtitle: banner?.subtitle || '',
     description: banner?.description || '',
+    tagline: banner?.tagline || '',
+    taglineDescription: banner?.taglineDescription || '',
     mediaType: banner?.mediaType || 'image',
     imageUrl: banner?.imageUrl || '',
     videoUrl: banner?.videoUrl || '',
@@ -267,6 +271,31 @@ export default function BannerForm({ banner, defaultLocation = 'home', onClose, 
               rows={3}
             />
             {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+          </div>
+
+          {/* Tagline & Tagline Description (home hero only) */}
+          <div className="space-y-4 border border-dashed border-gray-300 rounded-lg p-4">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-widest">Secondary Block (optional — Home Hero only)</p>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Tagline Heading</label>
+              <input
+                type="text"
+                value={formData.tagline}
+                onChange={(e) => handleChange('tagline', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="e.g., Hold a Hand in the Darkest Hour"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Tagline Description</label>
+              <textarea
+                value={formData.taglineDescription}
+                onChange={(e) => handleChange('taglineDescription', e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="e.g., At Shanthibhavan, we provide dignity and comfort..."
+                rows={2}
+              />
+            </div>
           </div>
 
           {/* CTA */}

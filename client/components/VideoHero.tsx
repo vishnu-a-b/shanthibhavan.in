@@ -5,10 +5,14 @@ import Link from 'next/link';
 import { Heart, ArrowRight, ChevronDown } from 'lucide-react';
 
 interface VideoHeroProps {
+  mediaType?: 'image' | 'video';
+  imageUrl?: string;
   videoUrl?: string;
   title?: string;
   subtitle?: string;
   description?: string;
+  tagline?: string;
+  taglineDescription?: string;
   ctaText?: string;
   ctaLink?: string;
   thumbnailUrl?: string;
@@ -22,10 +26,14 @@ const stats = [
 ];
 
 export default function VideoHero({
+  mediaType = 'video',
+  imageUrl,
   videoUrl,
   title,
   subtitle,
   description,
+  tagline,
+  taglineDescription,
   ctaText,
   ctaLink,
   thumbnailUrl,
@@ -35,18 +43,27 @@ export default function VideoHero({
       className="relative w-full overflow-hidden flex flex-col"
       style={{ minHeight: '100svh', background: '#050e24' }}
     >
-      {/* ── Full-screen video background ── */}
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster={thumbnailUrl || '/image/hero.jpeg'}
-        className="absolute inset-0 w-full h-full object-cover"
-        style={{ zIndex: 0 }}
-      >
-        <source src={videoUrl || '/video/hero.mp4'} type="video/mp4" />
-      </video>
+      {/* ── Full-screen background (image or video) ── */}
+      {mediaType === 'image' && imageUrl ? (
+        <img
+          src={imageUrl}
+          alt="Hero background"
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ zIndex: 0 }}
+        />
+      ) : videoUrl ? (
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          poster={thumbnailUrl || undefined}
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ zIndex: 0 }}
+        >
+          <source src={videoUrl} type="video/mp4" />
+        </video>
+      ) : null}
 
       {/* ── Navy gradient overlay ── */}
       <div
@@ -74,88 +91,127 @@ export default function VideoHero({
         <div className="flex flex-col items-center text-center max-w-3xl w-full">
 
           {/* Eyebrow badge pill */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.1 }}
-            className="mb-6"
-          >
-            <span
-              style={{
-                display: 'inline-block',
-                background: 'rgba(255,255,255,0.12)',
-                border: '1px solid rgba(255,255,255,0.25)',
-                color: '#ffffff',
-                borderRadius: '999px',
-                padding: '5px 18px',
-                fontSize: '11px',
-                fontFamily: 'var(--font-space-grotesk, sans-serif)',
-                fontWeight: 500,
-                letterSpacing: '0.16em',
-                textTransform: 'uppercase',
-              }}
+          {subtitle && (
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.1 }}
+              className="mb-6"
             >
-              {subtitle || "India's First No-Bill Hospital"}
-            </span>
-          </motion.div>
+              <span
+                style={{
+                  display: 'inline-block',
+                  background: 'rgba(255,255,255,0.12)',
+                  border: '1px solid rgba(255,255,255,0.25)',
+                  color: '#ffffff',
+                  borderRadius: '999px',
+                  padding: '5px 18px',
+                  fontSize: '11px',
+                  fontFamily: 'var(--font-space-grotesk, sans-serif)',
+                  fontWeight: 500,
+                  letterSpacing: '0.16em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                {subtitle}
+              </span>
+            </motion.div>
+          )}
 
           {/* Heading */}
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.25 }}
-            style={{
-              fontFamily: 'var(--font-playfair, Georgia, serif)',
-              fontSize: 'clamp(2.4rem, 5.5vw, 5rem)',
-              fontWeight: 'normal',
-              lineHeight: 1.08,
-              color: '#ffffff',
-              marginBottom: '20px',
-            }}
-          >
-            {title || (
-              <>
-                For the People,
-                <br />
-                By the People
-              </>
-            )}
-          </motion.h1>
+          {title && (
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.25 }}
+              style={{
+                fontFamily: 'var(--font-playfair, Georgia, serif)',
+                fontSize: 'clamp(2.4rem, 5.5vw, 5rem)',
+                fontWeight: 'normal',
+                lineHeight: 1.08,
+                color: '#ffffff',
+                marginBottom: '20px',
+              }}
+            >
+              {title}
+            </motion.h1>
+          )}
 
           {/* White divider */}
-          <motion.div
-            initial={{ scaleX: 0, opacity: 0 }}
-            animate={{ scaleX: 1, opacity: 1 }}
-            transition={{ duration: 0.55, delay: 0.45 }}
-            style={{ transformOrigin: 'center', marginBottom: '22px' }}
-          >
-            <div
-              style={{
-                width: '56px',
-                height: '1.5px',
-                background: 'rgba(255,255,255,0.55)',
-              }}
-            />
-          </motion.div>
+          {title && (
+            <motion.div
+              initial={{ scaleX: 0, opacity: 0 }}
+              animate={{ scaleX: 1, opacity: 1 }}
+              transition={{ duration: 0.55, delay: 0.45 }}
+              style={{ transformOrigin: 'center', marginBottom: '22px' }}
+            >
+              <div
+                style={{
+                  width: '56px',
+                  height: '1.5px',
+                  background: 'rgba(255,255,255,0.55)',
+                }}
+              />
+            </motion.div>
+          )}
 
           {/* Description */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.55 }}
-            style={{
-              color: 'rgba(220,230,245,0.75)',
-              fontSize: 'clamp(14px, 1.6vw, 16px)',
-              fontFamily: 'var(--font-space-grotesk, sans-serif)',
-              fontWeight: 300,
-              lineHeight: 1.85,
-              marginBottom: '40px',
-              maxWidth: '560px',
-            }}
-          >
-            {description ||
-              'Providing world-class medical support and comfort for those facing serious illness. All services at zero cost to patients — because compassion has no price.'}
-          </motion.p>
+          {description && (
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.55 }}
+              style={{
+                color: 'rgba(220,230,245,0.75)',
+                fontSize: 'clamp(14px, 1.6vw, 16px)',
+                fontFamily: 'var(--font-space-grotesk, sans-serif)',
+                fontWeight: 300,
+                lineHeight: 1.85,
+                marginBottom: (tagline || taglineDescription) ? '24px' : '40px',
+                maxWidth: '560px',
+              }}
+            >
+              {description}
+            </motion.p>
+          )}
+
+          {/* Secondary tagline block */}
+          {(tagline || taglineDescription) && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.63 }}
+              style={{ marginBottom: '40px', maxWidth: '560px' }}
+            >
+              {tagline && (
+                <p
+                  style={{
+                    color: 'rgba(255,255,255,0.90)',
+                    fontSize: 'clamp(14px, 1.6vw, 16px)',
+                    fontFamily: 'var(--font-playfair, Georgia, serif)',
+                    fontWeight: 600,
+                    lineHeight: 1.5,
+                    marginBottom: '8px',
+                  }}
+                >
+                  {tagline}
+                </p>
+              )}
+              {taglineDescription && (
+                <p
+                  style={{
+                    color: 'rgba(220,230,245,0.65)',
+                    fontSize: 'clamp(13px, 1.4vw, 15px)',
+                    fontFamily: 'var(--font-space-grotesk, sans-serif)',
+                    fontWeight: 300,
+                    lineHeight: 1.85,
+                  }}
+                >
+                  {taglineDescription}
+                </p>
+              )}
+            </motion.div>
+          )}
 
           {/* Buttons */}
           <motion.div
@@ -182,23 +238,25 @@ export default function VideoHero({
               <ArrowRight className="w-4 h-4" />
             </Link>
 
-            <Link
-              href={ctaLink || '/donate'}
-              className="inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 hover:bg-white/10 hover:-translate-y-0.5 active:scale-[0.98] w-full sm:w-auto"
-              style={{
-                border: '1.5px solid rgba(255,255,255,0.60)',
-                color: '#ffffff',
-                borderRadius: '3px',
-                padding: '14px 32px',
-                fontSize: '13px',
-                fontFamily: 'var(--font-space-grotesk, sans-serif)',
-                letterSpacing: '0.08em',
-                textTransform: 'uppercase',
-              }}
-            >
-              <Heart className="w-4 h-4" />
-              {ctaText || 'Donate Now'}
-            </Link>
+            {ctaText && (
+              <Link
+                href={ctaLink || '/donate'}
+                className="inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 hover:bg-white/10 hover:-translate-y-0.5 active:scale-[0.98] w-full sm:w-auto"
+                style={{
+                  border: '1.5px solid rgba(255,255,255,0.60)',
+                  color: '#ffffff',
+                  borderRadius: '3px',
+                  padding: '14px 32px',
+                  fontSize: '13px',
+                  fontFamily: 'var(--font-space-grotesk, sans-serif)',
+                  letterSpacing: '0.08em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                <Heart className="w-4 h-4" />
+                {ctaText}
+              </Link>
+            )}
           </motion.div>
         </div>
 

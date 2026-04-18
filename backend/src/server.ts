@@ -33,6 +33,7 @@ import campaignRoutes from './modules/campaign/campaign.routes.js';
 import footerRoutes from './modules/footer/footer.routes.js';
 import uploadRoutes from './modules/upload/upload.routes.js';
 import galleryRoutes from './modules/gallery/gallery.routes.js';
+import homepageSettingsRoutes from './modules/homepage-settings/homepage-settings.routes.js';
 
 // Load environment variables
 dotenv.config();
@@ -84,6 +85,7 @@ app.use('/v1/api/campaign', campaignRoutes);
 app.use('/v1/api/footer', footerRoutes);
 app.use('/v1/api/upload', uploadRoutes);
 app.use('/v1/api/gallery', galleryRoutes);
+app.use('/v1/api/homepage-settings', homepageSettingsRoutes);
 
 // Health check route
 app.get('/v1/api/health', (_req: Request, res: Response): void => {
