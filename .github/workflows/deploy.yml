@@ -114,12 +114,17 @@ jobs:
             docker tag ghcr.io/${{ github.repository_owner }}/sbtcr-frontend:${IMAGE_TAG} \
                        ghcr.io/${{ github.repository_owner }}/sbtcr-frontend:latest
 
-            # Rolling restart — support both docker compose (v2) and docker-compose (v1)
-            if docker compose version > /dev/null 2>&1; then
-              docker compose up -d --no-build
-            else
-              docker-compose up -d --no-build
+            # Install docker compose v2 plugin if not present
+            if ! docker compose version > /dev/null 2>&1; then
+              DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+              mkdir -p "$DOCKER_CONFIG/cli-plugins"
+              curl -fsSL "https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-$(uname -m)" \
+                -o "$DOCKER_CONFIG/cli-plugins/docker-compose"
+              chmod +x "$DOCKER_CONFIG/cli-plugins/docker-compose"
             fi
+
+            # Rolling restart with zero-downtime
+            docker compose up -d --no-build
 
             # Remove dangling images
             docker image prune -f
