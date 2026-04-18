@@ -95,8 +95,9 @@ jobs:
             # Navigate to project directory
             cd ${{ secrets.DEPLOY_PATH || '~/sbtcr' }}
 
-            # Pull latest code
-            git pull origin main
+            # Discard any local changes and sync to remote
+            git fetch origin main
+            git reset --hard origin/main
 
             # Log in to GHCR
             echo "${{ secrets.GITHUB_TOKEN }}" | \
