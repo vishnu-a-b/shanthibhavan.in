@@ -2,7 +2,7 @@ services:
 
   # ── Backend ──────────────────────────────────────────────────────────────
   backend:
-    image: ghcr.io/${GITHUB_REPOSITORY:-yourorg/sbtcr}-backend:${IMAGE_TAG:-latest}
+    image: ${BACKEND_IMAGE}:${IMAGE_TAG:-latest}
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -24,7 +24,7 @@ services:
 
   # ── Frontend ─────────────────────────────────────────────────────────────
   frontend:
-    image: ghcr.io/${GITHUB_REPOSITORY:-yourorg/sbtcr}-frontend:${IMAGE_TAG:-latest}
+    image: ${FRONTEND_IMAGE}:${IMAGE_TAG:-latest}
     build:
       context: ./client
       dockerfile: Dockerfile
