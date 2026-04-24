@@ -19,6 +19,7 @@ import {
   isTerminalCancellation,
 } from './utils/billdesk.util.js';
 import emailService from '../../services/email.service.js';
+import whatsappHelper from '../../services/whatsapp.service.js';
 
 /**
  * Initiate donation payment - BillDesk V2
@@ -231,6 +232,15 @@ export const verifyRazorpayPayment = async (req: Request, res: Response): Promis
         fellowship.totalPayments += 1;
         fellowship.donations.push(donation._id);
         await fellowship.save();
+      }
+
+      // Send fellowship payment receipt via WhatsApp
+      if (donation.phone) {
+        whatsappHelper.sendFellowshipPaymentReceipt(
+          donation.phone,
+          donation.donorName,
+          `₹${donation.amount.toLocaleString('en-IN')}`
+        ).catch(err => console.error('Failed to send fellowship WhatsApp receipt:', err));
       }
     }
 
@@ -454,6 +464,15 @@ export const handleBillDeskReturn = async (req: Request, res: Response): Promise
           fellowship.donations.push(donation._id);
           await fellowship.save();
         }
+
+        // Send fellowship payment receipt via WhatsApp
+        if (donation.phone) {
+          whatsappHelper.sendFellowshipPaymentReceipt(
+            donation.phone,
+            donation.donorName,
+            `₹${donation.amount.toLocaleString('en-IN')}`
+          ).catch(err => console.error('Failed to send fellowship WhatsApp receipt:', err));
+        }
       }
 
       // Update campaign if applicable
@@ -590,6 +609,15 @@ export const handleBillDeskWebhook = async (req: Request, res: Response): Promis
             fellowship.totalPayments += 1;
             fellowship.donations.push(donation._id);
             await fellowship.save();
+          }
+
+          // Send fellowship payment receipt via WhatsApp
+          if (donation.phone) {
+            whatsappHelper.sendFellowshipPaymentReceipt(
+              donation.phone,
+              donation.donorName,
+              `₹${donation.amount.toLocaleString('en-IN')}`
+            ).catch(err => console.error('Failed to send fellowship WhatsApp receipt:', err));
           }
         }
 
@@ -729,6 +757,15 @@ export const checkTransactionStatus = async (req: Request, res: Response): Promi
           fellowship.totalPayments += 1;
           fellowship.donations.push(donation._id);
           await fellowship.save();
+        }
+
+        // Send fellowship payment receipt via WhatsApp
+        if (donation.phone) {
+          whatsappHelper.sendFellowshipPaymentReceipt(
+            donation.phone,
+            donation.donorName,
+            `₹${donation.amount.toLocaleString('en-IN')}`
+          ).catch(err => console.error('Failed to send fellowship WhatsApp receipt:', err));
         }
       }
 
