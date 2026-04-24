@@ -105,7 +105,7 @@ export const generateReceiptPDFIndia = async (
   );
   yPosition += 30;
 
-  const amountInWords = toWords(user.amount).replace(/\b\w/g, (c) =>
+  const amountInWords = toWords(user.amount).replace(/\b\w/g, (c: string) =>
     c.toUpperCase()
   );
 
