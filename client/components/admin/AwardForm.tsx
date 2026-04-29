@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { X, Upload, Save } from 'lucide-react';
 import MediaUpload from './MediaUpload';
+import Image from 'next/image';
+import { getImageUrl } from '@/lib/image-url';
 
 interface AwardFormData {
   title: string;
@@ -162,7 +164,7 @@ export default function AwardForm({ award, onClose, onSave }: AwardFormProps) {
              <div className="flex gap-4 items-start">
                   {formData.image && (
                     <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-200">
-                      <img src={formData.image} alt="Award" className="w-full h-full object-cover" />
+                      <Image fill src={getImageUrl(formData.image)} alt="Award" className="object-cover" />
                       <button
                         type="button"
                         onClick={() => handleChange('image', '')}

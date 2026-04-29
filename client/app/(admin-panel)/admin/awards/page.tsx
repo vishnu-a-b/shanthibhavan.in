@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, EyeOff, Award as AwardIcon } from 'lucide-react';
 import AwardForm from '@/components/admin/AwardForm';
 import { getAwards, createAward, updateAward, deleteAward } from '@/app/actions/cms/awards';
+import Image from 'next/image';
+import { getImageUrl } from '@/lib/image-url';
 
 interface Award {
   _id: string;
@@ -146,7 +148,7 @@ export default function AwardsAdminPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {award.image ? (
-                        <img src={award.image} alt={award.title} className="w-12 h-12 rounded-lg object-cover" />
+                        <Image src={getImageUrl(award.image)} alt={award.title} width={48} height={48} className="rounded-lg object-cover" />
                       ) : (
                         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                           <AwardIcon className="w-6 h-6 text-gray-400" />

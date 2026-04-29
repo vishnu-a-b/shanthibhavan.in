@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { BarChart3, Heart, Users, TrendingUp, Pause, XCircle } from 'lucide-react';
+import { getValidAccessToken } from '../../login/actions';
 
 interface Stats {
   byStatus: Record<string, { count: number; totalMonthlyAmount: number }>;
@@ -23,7 +24,7 @@ export default function FellowshipStatsPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = document.cookie.split('; ').find(row => row.startsWith('admin_token='))?.split('=')[1];
+        const token = await getValidAccessToken();
         const res = await fetch(`${API_URL}/api/fellowship/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         });

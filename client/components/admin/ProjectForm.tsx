@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { X, Upload, Save, Plus, Trash2 } from 'lucide-react';
 import MediaUpload from './MediaUpload';
+import Image from 'next/image';
+import { getImageUrl } from '@/lib/image-url';
 
 interface ProjectFormData {
   projectName: string;
@@ -185,7 +187,7 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
               <div className="flex gap-4 items-start">
                   {formData.featuredImage && (
                     <div className="relative w-32 h-32 rounded-lg overflow-hidden border border-gray-200">
-                      <img src={formData.featuredImage} alt="Featured" className="w-full h-full object-cover" />
+                      <Image fill src={getImageUrl(formData.featuredImage)} alt="Featured" className="object-cover" />
                       <button
                         type="button"
                         onClick={() => handleChange('featuredImage', '')}
@@ -217,7 +219,7 @@ export default function ProjectForm({ project, onClose, onSave }: ProjectFormPro
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {formData.gallery.map((url, index) => (
                   <div key={index} className="relative group rounded-lg overflow-hidden border border-gray-200 aspect-video bg-gray-50">
-                    <img src={url} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
+                    <Image fill src={getImageUrl(url)} alt={`Gallery ${index + 1}`} className="object-cover" />
                     <button
                       type="button"
                       onClick={() => removeGalleryImage(index)}

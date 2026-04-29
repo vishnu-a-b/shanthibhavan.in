@@ -3,12 +3,11 @@ import {
   initiateDonation,
   verifyRazorpayPayment,
   handleRazorpayFailure,
-  handleBillDeskReturn,
-  handleBillDeskWebhook,
-  checkTransactionStatus,
   getDonationById,
   listDonations,
-  getDonationStats
+  getDonationStats,
+  getOrGenerateReceipt,
+  downloadReceiptPublic
 } from './donation.controller.js';
 import {
   addOfflinePayment,
@@ -22,17 +21,11 @@ import { AdminRole } from '../admin/admin.model.js';
 
 const router: Router = express.Router();
 
-// Middleware to parse text/plain and application/jose bodies (BillDesk sends JOSE tokens)
-const textBodyParser = express.text({ type: ['text/plain', 'application/jose', 'application/jwt'] });
-
 // Public routes
 router.post('/initiate', initiateDonation);
 router.post('/verify-razorpay', verifyRazorpayPayment);
 router.post('/razorpay-failure', handleRazorpayFailure);
-router.post('/callback/billdesk/return', textBodyParser, handleBillDeskReturn);
-router.get('/callback/billdesk/return', handleBillDeskReturn); // Support both GET and POST
-router.post('/callback/billdesk/webhook', textBodyParser, handleBillDeskWebhook);
-router.get('/status/:orderId', checkTransactionStatus); // Check transaction status
+router.get('/receipt/download/:receiptNumber', downloadReceiptPublic);
 
 // Offline payment routes (must be before /:id to avoid route conflicts)
 router.post('/offline',
@@ -56,6 +49,7 @@ router.get('/offline/history',
 // Protected routes - require authentication
 router.get('/stats', requireAuth, getDonationStats);
 router.get('/', requireAuth, listDonations);
+router.get('/:id/receipt', requireAuth, getOrGenerateReceipt);
 router.get('/:id', requireAuth, getDonationById);
 
 // Donation actions (must be after specific routes)

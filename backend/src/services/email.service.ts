@@ -15,6 +15,11 @@ interface EmailOptions {
   subject: string;
   html: string;
   text?: string;
+  attachments?: Array<{
+    filename: string;
+    content: Buffer;
+    contentType: string;
+  }>;
 }
 
 class EmailService {
@@ -24,7 +29,7 @@ class EmailService {
 
   constructor() {
     this.fromEmail = process.env.EMAIL_FROM || 'noreply@shantibhavan.org';
-    this.fromName = process.env.EMAIL_FROM_NAME || 'Shanthi Bhavan';
+    this.fromName = process.env.EMAIL_FROM_NAME || 'Shanthibhavan Palliative India';
     this.initTransporter();
   }
 
@@ -61,7 +66,8 @@ class EmailService {
         to: options.to,
         subject: options.subject,
         html: options.html,
-        text: options.text || options.html.replace(/<[^>]*>/g, '')
+        text: options.text || options.html.replace(/<[^>]*>/g, ''),
+        attachments: options.attachments
       });
       console.log('Email sent successfully to:', options.to);
       return true;
@@ -81,6 +87,7 @@ class EmailService {
     donationType: string;
     receiptNumber?: string;
     paymentMethod?: string;
+    receiptPdf?: Buffer;
   }): Promise<boolean> {
     const donationDate = new Date().toLocaleDateString('en-IN', { dateStyle: 'long' });
     const html = `
@@ -161,7 +168,14 @@ class EmailService {
     return this.sendEmail({
       to: data.email,
       subject: `Donation Receipt - ${data.currency} ${data.amount.toLocaleString()} | Shanthi Bhavan`,
-      html
+      html,
+      ...(data.receiptPdf && data.receiptNumber && {
+        attachments: [{
+          filename: `${data.receiptNumber}.pdf`,
+          content: data.receiptPdf,
+          contentType: 'application/pdf',
+        }]
+      })
     });
   }
 
@@ -428,6 +442,7 @@ class EmailService {
     amount: number;
     currency: string;
     receiptNumber?: string;
+    receiptPdf?: Buffer;
   }): Promise<boolean> {
     const html = `
 <!DOCTYPE html>
@@ -474,7 +489,14 @@ class EmailService {
     return this.sendEmail({
       to: data.email,
       subject: `Donation Confirmed - ${data.currency} ${data.amount.toLocaleString()}`,
-      html
+      html,
+      ...(data.receiptPdf && data.receiptNumber && {
+        attachments: [{
+          filename: `${data.receiptNumber}.pdf`,
+          content: data.receiptPdf,
+          contentType: 'application/pdf',
+        }]
+      })
     });
   }
 

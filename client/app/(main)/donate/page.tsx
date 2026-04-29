@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/Tabs";
 import Link from "next/link";
-import { Heart, Users, Target, Loader2, ArrowRight, Calendar, IndianRupee, ExternalLink } from "lucide-react";
+import { Heart, Users, Target, Loader2, ArrowRight, Calendar, IndianRupee, ExternalLink, X } from "lucide-react";
 import PhoneInput from 'react-phone-number-input';
 import 'react-phone-number-input/style.css';
 
@@ -24,10 +24,26 @@ interface Campaign {
   endDate?: string;
 }
 
+interface PendingPayment {
+  donorName: string;
+  email: string;
+  phone: string;
+  amount: number;
+  donationType: string;
+  panNumber?: string;
+  address?: string;
+  notes?: string;
+  campaignId?: string;
+  campaignTitle?: string;
+  isAnonymous?: boolean;
+}
+
 const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
 const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
 
 const FELLOWSHIP_URL = 'https://fellowship.shanthibhavan.in/fellowship-packages';
+
+const PAN_REGEX = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 
 const loadRazorpay = (): Promise<boolean> => {
   return new Promise((resolve) => {
@@ -58,6 +74,13 @@ function DonateContent() {
   const [generalPhone, setGeneralPhone] = useState<string | undefined>();
   const [campaignPhone, setCampaignPhone] = useState<string | undefined>();
 
+  // Validation errors
+  const [generalPanError, setGeneralPanError] = useState('');
+  const [campaignPanError, setCampaignPanError] = useState('');
+
+  // Confirmation modal
+  const [pendingPayment, setPendingPayment] = useState<PendingPayment | null>(null);
+
   // Form states
   const [generalForm, setGeneralForm] = useState({
     donorName: '',
@@ -65,7 +88,8 @@ function DonateContent() {
     amount: '',
     panNumber: '',
     address: '',
-    notes: ''
+    notes: '',
+    isAnonymous: false
   });
 
   const [campaignForm, setCampaignForm] = useState({
@@ -73,7 +97,8 @@ function DonateContent() {
     email: '',
     amount: '',
     panNumber: '',
-    address: ''
+    address: '',
+    isAnonymous: false
   });
 
   useEffect(() => {
@@ -86,13 +111,6 @@ function DonateContent() {
       setActiveTab(tabParam);
     }
   }, [tabParam]);
-
-  // Redirect to external fellowship site when fellowship tab is selected
-  useEffect(() => {
-    if (activeTab === 'fellowship') {
-      window.location.href = FELLOWSHIP_URL;
-    }
-  }, [activeTab]);
 
   // Pre-select campaign from URL slug
   useEffect(() => {
@@ -119,17 +137,7 @@ function DonateContent() {
     }
   };
 
-  const openRazorpayCheckout = async (options: {
-    donorName: string;
-    email: string;
-    phone: string;
-    amount: number;
-    donationType: string;
-    panNumber?: string;
-    address?: string;
-    notes?: string;
-    campaignId?: string;
-  }) => {
+  const openRazorpayCheckout = async (options: PendingPayment) => {
     setLoading(true);
     try {
       // Create order on backend
@@ -222,35 +230,62 @@ function DonateContent() {
     }
   };
 
-  const handleGeneralDonation = async (e: React.FormEvent) => {
+  const handleGeneralDonation = (e: React.FormEvent) => {
     e.preventDefault();
-    await openRazorpayCheckout({
+    setGeneralPanError('');
+
+    if (!generalPhone) {
+      alert('Phone number is required to send your receipt via WhatsApp.');
+      return;
+    }
+
+    if (generalForm.panNumber && !PAN_REGEX.test(generalForm.panNumber)) {
+      setGeneralPanError('Invalid PAN format. Expected: ABCDE1234F');
+      return;
+    }
+
+    setPendingPayment({
       donorName: generalForm.donorName,
       email: generalForm.email,
-      phone: generalPhone || '',
+      phone: generalPhone,
       amount: parseFloat(generalForm.amount),
       donationType: 'general',
-      panNumber: generalForm.panNumber,
-      address: generalForm.address,
-      notes: generalForm.notes,
+      panNumber: generalForm.panNumber || undefined,
+      address: generalForm.address || undefined,
+      notes: generalForm.notes || undefined,
+      isAnonymous: generalForm.isAnonymous,
     });
   };
 
-  const handleCampaignDonation = async (e: React.FormEvent) => {
+  const handleCampaignDonation = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedCampaign) {
       alert('Please select a campaign');
       return;
     }
-    await openRazorpayCheckout({
+    setCampaignPanError('');
+
+    if (!campaignPhone) {
+      alert('Phone number is required to send your receipt via WhatsApp.');
+      return;
+    }
+
+    if (campaignForm.panNumber && !PAN_REGEX.test(campaignForm.panNumber)) {
+      setCampaignPanError('Invalid PAN format. Expected: ABCDE1234F');
+      return;
+    }
+
+    setPendingPayment({
       donorName: campaignForm.donorName,
       email: campaignForm.email,
-      phone: campaignPhone || '',
+      phone: campaignPhone,
       amount: parseFloat(campaignForm.amount),
       donationType: 'campaign',
-      panNumber: campaignForm.panNumber,
-      address: campaignForm.address,
+      panNumber: campaignForm.panNumber || undefined,
+      address: campaignForm.address || undefined,
       campaignId: selectedCampaign._id,
+      campaignTitle: selectedCampaign.title,
+      isAnonymous: campaignForm.isAnonymous,
     });
   };
 
@@ -403,7 +438,10 @@ function DonateContent() {
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                        Phone <span className="text-red-500">*</span>
+                        <span className="text-xs text-gray-400 font-normal ml-1">(for WhatsApp receipt)</span>
+                      </label>
                       <PhoneInput
                         international
                         defaultCountry="IN"
@@ -417,11 +455,15 @@ function DonateContent() {
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">PAN Number <span className="text-xs text-gray-400">(for 80G receipt)</span></label>
                         <Input
                           value={generalForm.panNumber}
-                          onChange={(e) => setGeneralForm({ ...generalForm, panNumber: e.target.value.toUpperCase() })}
+                          onChange={(e) => {
+                            setGeneralPanError('');
+                            setGeneralForm({ ...generalForm, panNumber: e.target.value.toUpperCase() });
+                          }}
                           placeholder="ABCDE1234F"
                           maxLength={10}
                           className="rounded-lg"
                         />
+                        {generalPanError && <p className="text-red-500 text-xs mt-1">{generalPanError}</p>}
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
@@ -473,6 +515,15 @@ function DonateContent() {
                         className="rounded-lg"
                       />
                     </div>
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-600">
+                      <input
+                        type="checkbox"
+                        checked={generalForm.isAnonymous}
+                        onChange={(e) => setGeneralForm({ ...generalForm, isAnonymous: e.target.checked })}
+                        className="w-4 h-4 rounded border-gray-300 text-primary"
+                      />
+                      Make my donation anonymous (your name won&apos;t appear in public records)
+                    </label>
                     <Button type="submit" disabled={loading} className="w-full rounded-xl" size="lg">
                       {loading ? (
                         <>
@@ -491,7 +542,7 @@ function DonateContent() {
               </div>
             </TabsContent>
 
-            {/* Fellowship — redirect to external site */}
+            {/* Fellowship — external portal with confirmation UI */}
             <TabsContent value="fellowship">
               <div className="rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div className="bg-linear-to-r from-primary to-primary/80 px-6 py-5">
@@ -637,7 +688,10 @@ function DonateContent() {
                             </div>
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Phone</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                              Phone <span className="text-red-500">*</span>
+                              <span className="text-xs text-gray-400 font-normal ml-1">(for WhatsApp receipt)</span>
+                            </label>
                             <PhoneInput
                               international
                               defaultCountry="IN"
@@ -651,11 +705,15 @@ function DonateContent() {
                               <label className="block text-sm font-medium text-gray-700 mb-1.5">PAN Number <span className="text-xs text-gray-400">(for 80G receipt)</span></label>
                               <Input
                                 value={campaignForm.panNumber}
-                                onChange={(e) => setCampaignForm({ ...campaignForm, panNumber: e.target.value.toUpperCase() })}
+                                onChange={(e) => {
+                                  setCampaignPanError('');
+                                  setCampaignForm({ ...campaignForm, panNumber: e.target.value.toUpperCase() });
+                                }}
                                 placeholder="ABCDE1234F"
                                 maxLength={10}
                                 className="rounded-lg"
                               />
+                              {campaignPanError && <p className="text-red-500 text-xs mt-1">{campaignPanError}</p>}
                             </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
@@ -698,6 +756,15 @@ function DonateContent() {
                               ))}
                             </div>
                           </div>
+                          <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-600">
+                            <input
+                              type="checkbox"
+                              checked={campaignForm.isAnonymous}
+                              onChange={(e) => setCampaignForm({ ...campaignForm, isAnonymous: e.target.checked })}
+                              className="w-4 h-4 rounded border-gray-300 text-primary"
+                            />
+                            Make my donation anonymous
+                          </label>
                           <Button type="submit" disabled={loading} className="w-full rounded-xl" size="lg">
                             {loading ? (
                               <>
@@ -746,6 +813,72 @@ function DonateContent() {
           </div>
         </div>
       </section>
+
+      {/* Payment Confirmation Modal */}
+      {pendingPayment && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Confirm Your Donation</h2>
+              <button
+                onClick={() => setPendingPayment(null)}
+                className="p-1.5 hover:bg-gray-100 rounded-lg"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+            <p className="text-gray-500 text-sm mb-5">Please review the details before proceeding to payment.</p>
+
+            <div className="bg-gray-50 rounded-xl p-4 space-y-2.5 text-sm mb-5">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Name</span>
+                <span className="font-medium text-gray-900">{pendingPayment.donorName}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Email</span>
+                <span className="font-medium text-gray-900">{pendingPayment.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Type</span>
+                <span className="font-medium text-gray-900 capitalize">
+                  {pendingPayment.campaignTitle || pendingPayment.donationType}
+                </span>
+              </div>
+              {pendingPayment.panNumber && (
+                <div className="flex justify-between">
+                  <span className="text-gray-500">PAN</span>
+                  <span className="font-mono font-medium text-gray-900">{pendingPayment.panNumber}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-center border-t border-gray-200 pt-3 mt-1">
+                <span className="text-gray-700 font-semibold">Amount</span>
+                <span className="text-2xl font-bold text-primary">₹{pendingPayment.amount.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setPendingPayment(null)}
+                disabled={loading}
+                className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 font-medium transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  const opts = pendingPayment;
+                  setPendingPayment(null);
+                  await openRazorpayCheckout(opts);
+                }}
+                disabled={loading}
+                className="flex-1 px-4 py-2.5 bg-primary text-white rounded-xl font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+              >
+                {loading ? 'Processing...' : 'Proceed to Payment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

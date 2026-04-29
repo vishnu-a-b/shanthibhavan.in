@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, EyeOff, ImageIcon, Heart } from 'lucide-react';
 import ProjectForm from '@/components/admin/ProjectForm';
 import { getProjects, createProject, updateProject, deleteProject } from '@/app/actions/cms/projects';
+import Image from 'next/image';
+import { getImageUrl } from '@/lib/image-url';
 
 interface FeaturedProject {
   _id: string;
@@ -153,7 +155,7 @@ export default function BenevityProjectsAdminPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       {project.featuredImage ? (
-                        <img src={project.featuredImage} alt={project.projectName} className="w-12 h-12 rounded-lg object-cover" />
+                        <Image src={getImageUrl(project.featuredImage)} alt={project.projectName} width={48} height={48} className="rounded-lg object-cover" />
                       ) : (
                         <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
                           <ImageIcon className="w-6 h-6 text-gray-400" />

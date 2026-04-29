@@ -8,30 +8,31 @@ import whatsappHelper from "./whatsapp.service.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export const generateReceiptPDFIndia = async (
-  res: Response,
-  user: {
-    name: string;
-    amount: number;
-    date: string;
-    phoneNo: string;
-    address: string;
-    transactionNumber: string;
-    receiptNumber: string;
-    programName?: string;
-  }
-) => {
-  console.log(user);
+const RECEIPTS_DIR = path.join(__dirname, "../../public/receipts");
 
+// Ensure receipts directory exists
+if (!fs.existsSync(RECEIPTS_DIR)) {
+  fs.mkdirSync(RECEIPTS_DIR, { recursive: true });
+}
+
+export interface ReceiptUser {
+  name: string;
+  amount: number;
+  date: string;
+  phoneNo: string;
+  address: string;
+  transactionNumber: string;
+  receiptNumber: string;
+  programName?: string;
+}
+
+/** Build the PDF buffer without sending anything to HTTP */
+export const buildReceiptBuffer = (user: ReceiptUser): Promise<Buffer> => {
   const doc = new PDFDocument({ margin: 40, size: "A4" });
-
   const buffers: Buffer[] = [];
   doc.on("data", buffers.push.bind(buffers));
-
   const pdfPromise = new Promise<Buffer>((resolve) => {
-    doc.on("end", () => {
-      resolve(Buffer.concat(buffers));
-    });
+    doc.on("end", () => resolve(Buffer.concat(buffers)));
   });
 
   const addHorizontalLine = (y: number, margin = 40) => {
@@ -47,7 +48,7 @@ export const generateReceiptPDFIndia = async (
   doc.fontSize(12).font("Helvetica-Bold");
   doc.text("Shanthibhavan Palliative International India", 40, yPosition);
   yPosition += 15;
-  doc.text("PAN: [Your PAN Number]", 40, yPosition);
+  doc.text(`PAN: ${process.env.ORG_PAN || '[PAN Not Configured]'}`, 40, yPosition);
   yPosition += 15;
   doc.text("Registered Charitable Trust - 80G Approved", 40, yPosition);
 
@@ -56,8 +57,8 @@ export const generateReceiptPDFIndia = async (
     if (fs.existsSync(logoPath)) {
       doc.image(logoPath, doc.page.width - 140, 20, { width: 75, height: 75 });
     }
-  } catch (error) {
-    console.log("Logo not found, skipping...");
+  } catch {
+    // Logo not found, skip
   }
 
   yPosition += 30;
@@ -105,18 +106,13 @@ export const generateReceiptPDFIndia = async (
   );
   yPosition += 30;
 
-  const amountInWords = toWords(user.amount).replace(/\b\w/g, (c: string) =>
-    c.toUpperCase()
-  );
+  const amountInWords = toWords(user.amount).replace(/\b\w/g, (c: string) => c.toUpperCase());
 
   const tableData = [
     ["Receipt No", user.receiptNumber],
     ["Payment Date", user.date],
     ["Transaction Number", user.transactionNumber],
-    [
-      "Amount Received",
-      `₹${user.amount.toLocaleString("en-IN")} (${amountInWords} Rupees Only)`,
-    ],
+    ["Amount Received", `₹${user.amount.toLocaleString("en-IN")} (${amountInWords} Rupees Only)`],
     ["Towards", "Shanthibhavan Palliative International India"],
   ];
 
@@ -139,11 +135,7 @@ export const generateReceiptPDFIndia = async (
 
   doc.fontSize(11).font("Helvetica-Bold");
   doc.text("Description", 40, yPosition, { continued: true });
-  doc
-    .font("Helvetica")
-    .text(
-      " : This is a gift received to support the free treatment of bedridden patients."
-    );
+  doc.font("Helvetica").text(" : This is a gift received to support the free treatment of bedridden patients.");
   yPosition += 30;
 
   addHorizontalLine(yPosition);
@@ -151,12 +143,10 @@ export const generateReceiptPDFIndia = async (
 
   doc.fontSize(11).font("Helvetica-Bold");
   doc.text("Declaration", 40, yPosition, { continued: true });
-  doc
-    .font("Helvetica")
-    .text(
-      " : This receipt acknowledges that the above amount was donated to Shanthibhavan Palliative International India. No goods or services were received in return for this donation. This donation is eligible for tax deduction under Section 80G of the Income Tax Act, 1961.",
-      { width: 500 }
-    );
+  doc.font("Helvetica").text(
+    " : This receipt acknowledges that the above amount was donated to Shanthibhavan Palliative International India. No goods or services were received in return for this donation. This donation is eligible for tax deduction under Section 80G of the Income Tax Act, 1961.",
+    { width: 500 }
+  );
   yPosition += 50;
 
   addHorizontalLine(yPosition);
@@ -164,12 +154,10 @@ export const generateReceiptPDFIndia = async (
 
   doc.fontSize(11).font("Helvetica-Bold");
   doc.text("Registered office address", 40, yPosition, { continued: true });
-  doc
-    .font("Helvetica")
-    .text(
-      " : Shanthibhavan Palliative International India, Alukkaparambil House, Karukulangara, Irinjalakuda, Thrissur, Kerala-680121, India",
-      { width: 500 }
-    );
+  doc.font("Helvetica").text(
+    " : Shanthibhavan Palliative International India, Alukkaparambil House, Karukulangara, Irinjalakuda, Thrissur, Kerala-680121, India",
+    { width: 500 }
+  );
   yPosition += 40;
 
   addHorizontalLine(yPosition);
@@ -178,18 +166,12 @@ export const generateReceiptPDFIndia = async (
   doc.fontSize(10).font("Helvetica");
   doc.text(
     "This receipt can be used for claiming a tax deduction under Section 80G of Income Tax Act, 1961.",
-    40,
-    yPosition,
-    { width: 500 }
+    40, yPosition, { width: 500 }
   );
   yPosition += 15;
   doc.text("For any enquiries, please contact us at:", 40, yPosition);
   yPosition += 12;
-  doc.text(
-    "Email: operationssbind@palliativeinternational.com",
-    40,
-    yPosition
-  );
+  doc.text("Email: operationssbind@palliativeinternational.com", 40, yPosition);
   yPosition += 12;
   doc.text("Phone: +91 9496277968", 40, yPosition);
   yPosition += 12;
@@ -202,22 +184,38 @@ export const generateReceiptPDFIndia = async (
   doc.fontSize(10).font("Helvetica");
   doc.text(
     "Shanthibhavan Palliative International India is registered under Section 80G of the Income Tax Act, 1961. Donations made to this organization are eligible for tax deduction as per applicable laws.",
-    40,
-    yPosition,
-    { width: 500 }
+    40, yPosition, { width: 500 }
   );
   yPosition += 40;
 
   doc.fontSize(9).font("Helvetica");
-  const footerText =
-    "This is an electronically generated receipt and does not require a signature.";
+  const footerText = "This is an electronically generated receipt and does not require a signature.";
   const footerWidth = doc.widthOfString(footerText);
   const centerX = (doc.page.width - footerWidth) / 2;
   doc.fillColor("#666").text(footerText, centerX, yPosition);
 
   doc.end();
+  return pdfPromise;
+};
 
-  const pdfBuffer = await pdfPromise;
+/**
+ * Save receipt PDF to disk under public/receipts/ and return the public URL.
+ */
+export const saveReceiptToFile = async (user: ReceiptUser): Promise<string> => {
+  const buffer = await buildReceiptBuffer(user);
+  const filename = `${user.receiptNumber}.pdf`;
+  const filePath = path.join(RECEIPTS_DIR, filename);
+  fs.writeFileSync(filePath, buffer);
+
+  const backendUrl = (process.env.BACKEND_URL || 'http://localhost:3003').replace(/\/$/, '');
+  return `${backendUrl}/public/receipts/${filename}`;
+};
+
+export const generateReceiptPDFIndia = async (
+  res: Response,
+  user: ReceiptUser
+) => {
+  const pdfBuffer = await buildReceiptBuffer(user);
 
   try {
     await whatsappHelper.sendDonationReceipt(

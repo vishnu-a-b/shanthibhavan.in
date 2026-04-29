@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Plus, Edit, Trash2, Eye, EyeOff, User } from 'lucide-react';
 import TeamMemberForm from '@/components/admin/TeamMemberForm';
 import { getTeamMembers, createTeamMember, updateTeamMember, deleteTeamMember } from '@/app/actions/cms/team';
@@ -129,7 +130,7 @@ export default function TeamAdminPage() {
               {/* Profile Image */}
               <div className="relative h-64 bg-gray-200">
                 {member.image ? (
-                  <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+                  <Image fill src={member.image} alt={member.name} className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <User className="w-16 h-16 text-gray-400" />

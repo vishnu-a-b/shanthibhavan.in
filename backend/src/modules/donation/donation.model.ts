@@ -34,20 +34,21 @@ export interface IDonationDocument extends Document {
   donationType: DonationType;
   notes?: string;
 
-  // Payment Gateway Fields (BillDesk)
+  // Payment Gateway Fields (Razorpay)
   paymentStatus: PaymentStatus;
-  transactionId?: string; // BillDesk transaction ID
+  transactionId?: string; // Razorpay payment ID
   gatewayOrderId?: string; // Our generated order ID
-  bdOrderId?: string; // BillDesk generated order ID (V2)
+  razorpayOrderId?: string; // Razorpay generated order ID
   bankReferenceNumber?: string;
   paymentMethod?: string; // card, upi, netbanking, etc.
 
-  // BillDesk Response Data
-  authStatus?: string; // BillDesk auth status code
-  gatewayResponse?: string; // Full response from BillDesk
-  encodedRequest?: string; // Original encoded JWS/JWE request string
-  encodedResponse?: string; // Original encoded JWS/JWE response string
+  // Gateway Response Data
+  authStatus?: string; // Payment auth status code
+  gatewayResponse?: string; // Full response from gateway
   checksumVerified?: boolean;
+
+  // Donor Preferences
+  isAnonymous?: boolean; // Donor wishes to remain anonymous in public displays
 
   // Offline Payment Workflow
   isOffline: boolean;
@@ -145,7 +146,7 @@ const DonationSchema = new Schema<IDonationDocument>({
     sparse: true,
     index: true
   },
-  bdOrderId: {
+  razorpayOrderId: {
     type: String,
     sparse: true,
     index: true
@@ -157,21 +158,21 @@ const DonationSchema = new Schema<IDonationDocument>({
     type: String
   },
 
-  // BillDesk Response Data
+  // Gateway Response Data
   authStatus: {
     type: String
   },
   gatewayResponse: {
     type: String
   },
-  encodedRequest: {
-    type: String  // Original encoded (JWS/JWE) Create Order request
-  },
-  encodedResponse: {
-    type: String  // Original encoded (JWS/JWE) response string
-  },
   checksumVerified: {
     type: Boolean
+  },
+
+  // Donor Preferences
+  isAnonymous: {
+    type: Boolean,
+    default: false
   },
 
   // Offline Payment Workflow

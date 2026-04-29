@@ -20,6 +20,11 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
+        protocol: 'https',
+        hostname: 'api.gift.shanthibhavan.in',
+        pathname: '/**',
+      },
+      {
         protocol: 'http',
         hostname: '127.0.0.1',
         pathname: '/**',
@@ -35,6 +40,12 @@ const nextConfig: NextConfig = {
         hostname: 'localhost',
         pathname: '/**',
         port: '5001',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        pathname: '/**',
+        port: '3003',
       },
     ],
   },

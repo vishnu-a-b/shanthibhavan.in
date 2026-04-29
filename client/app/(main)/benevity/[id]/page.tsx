@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/Button";
 import Link from "next/link";
 import { ArrowLeft, Calendar } from "lucide-react";
 import RevealAnimation from "@/components/RevealAnimation";
+import Image from "next/image";
+import { getImageUrl } from "@/lib/image-url";
 
 export default async function BenevityProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -23,10 +25,11 @@ export default async function BenevityProjectDetailPage({ params }: { params: Pr
     <div className="flex flex-col min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative h-[50vh] min-h-[400px]">
-        <img
-          src={project.featuredImage}
+        <Image
+          fill
+          src={getImageUrl(project.featuredImage)}
           alt={project.projectName}
-          className="w-full h-full object-cover"
+          className="object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
         <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12">
@@ -71,8 +74,8 @@ export default async function BenevityProjectDetailPage({ params }: { params: Pr
                <h3 className="text-2xl font-bold text-primary mb-6">Project Gallery</h3>
                <div className="grid md:grid-cols-2 gap-4">
                  {project.gallery.map((img: string, index: number) => (
-                   <div key={index} className="rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow aspect-video">
-                     <img src={img} alt={`Gallery ${index + 1}`} className="w-full h-full object-cover" />
+                   <div key={index} className="relative rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-shadow aspect-video">
+                     <Image fill src={getImageUrl(img)} alt={`Gallery ${index + 1}`} className="object-cover" />
                    </div>
                  ))}
                </div>

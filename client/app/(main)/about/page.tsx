@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Card, CardContent } from "@/components/ui/Card";
 import { Users, Target, History, Lightbulb, Award, ArrowRight } from "lucide-react";
 import { getAboutContent } from "@/app/actions/about";
@@ -84,7 +85,7 @@ export default async function AboutPage() {
              </div>
            </div>
            <div className="h-full min-h-[300px] bg-gray-200 rounded-xl overflow-hidden shadow-lg relative">
-             <img src={storyImage} alt={storyTitle} className="w-full h-full object-cover absolute inset-0" />
+             <Image fill src={storyImage} alt={storyTitle} className="object-cover" />
            </div>
         </div>
 

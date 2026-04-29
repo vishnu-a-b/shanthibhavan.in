@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { UserPlus, ArrowLeft, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
+import { getValidAccessToken } from '../../login/actions';
 
 const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
 const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
@@ -29,7 +30,7 @@ export default function AddFellowshipPage() {
     setError('');
 
     try {
-      const token = document.cookie.split('; ').find(row => row.startsWith('admin_token='))?.split('=')[1];
+      const token = await getValidAccessToken();
 
       const res = await fetch(`${API_URL}/api/fellowship/subscribe`, {
         method: 'POST',

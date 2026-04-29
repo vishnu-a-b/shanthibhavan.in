@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 
@@ -40,7 +41,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3">
             <div className="bg-white rounded-xl px-2 py-1 flex items-center">
-              <img src="/logo/logo.png" alt="Shanthibhavan Logo" className="h-11 w-auto" />
+              <Image src="/logo/logo.png" alt="Shanthibhavan Logo" width={120} height={44} className="h-11 w-auto" />
             </div>
             {/* <span className="text-lg font-bold hidden md:inline-block tracking-tight">
               <span className="text-white">Shanthi</span>

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Wallet, TrendingUp, CheckCircle, XCircle, CreditCard, Heart } from 'lucide-react';
+import { getValidAccessToken } from '../../login/actions';
 
 interface Stats {
   totalDonations: number;
@@ -21,7 +22,7 @@ export default function DonationStatsPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const token = document.cookie.split('; ').find(row => row.startsWith('admin_token='))?.split('=')[1];
+        const token = await getValidAccessToken();
         const res = await fetch(`${API_URL}/api/donation/stats`, {
           headers: { Authorization: `Bearer ${token}` },
         });

@@ -4,7 +4,9 @@ export enum TransactionType {
   PAYMENT_INITIATED = 'payment_initiated',
   PAYMENT_RETURN = 'payment_return',
   PAYMENT_WEBHOOK = 'payment_webhook',
-  STATUS_CHECK = 'status_check'
+  STATUS_CHECK = 'status_check',
+  OFFLINE_APPROVED = 'offline_approved',
+  OFFLINE_REJECTED = 'offline_rejected'
 }
 
 export interface ITransactionDocument extends Document {
@@ -21,9 +23,9 @@ export interface ITransactionDocument extends Document {
   responseHeaders?: any;
   responseStatus?: number;
 
-  // BillDesk Specific
-  bdOrderId?: string;
-  bdTransactionId?: string;
+  // Gateway Specific
+  orderId?: string;
+  gatewayTransactionId?: string;
   checksumSent?: string;
   checksumReceived?: string;
   checksumVerified?: boolean;
@@ -72,12 +74,12 @@ const TransactionSchema = new Schema<ITransactionDocument>({
     type: Number
   },
 
-  // BillDesk Specific
-  bdOrderId: {
+  // Gateway Specific
+  orderId: {
     type: String,
     index: true
   },
-  bdTransactionId: {
+  gatewayTransactionId: {
     type: String,
     index: true
   },

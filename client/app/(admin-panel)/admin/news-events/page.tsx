@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Eye, EyeOff, Calendar, Newspaper, Clock } from 'lucide-react';
 import NewsEventForm from '@/components/admin/NewsEventForm';
 import { getNewsEvents, createNewsEvent, updateNewsEvent, deleteNewsEvent } from '@/app/actions/cms/newsEvents';
+import Image from 'next/image';
+import { getImageUrl } from '@/lib/image-url';
 
 interface NewsEvent {
   _id: string;
@@ -157,7 +159,7 @@ export default function NewsEventsAdminPage() {
               {/* Header with Type Badge */}
               <div className="relative h-48 bg-gray-200">
                 {item.images && item.images.length > 0 ? (
-                  <img src={item.images[0]} alt={item.title} className="w-full h-full object-cover" />
+                  <Image fill src={getImageUrl(item.images[0])} alt={item.title} className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     {item.type === 'news' ? (
