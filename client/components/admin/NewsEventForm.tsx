@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { X, Save, Plus, Trash2, Calendar, Newspaper } from 'lucide-react';
 import MediaUpload from './MediaUpload';
+import Image from 'next/image';
+import { getImageUrl } from '@/lib/image-url';
 
 interface NewsEventFormData {
   title: string;
@@ -203,7 +205,7 @@ export default function NewsEventForm({ item, onClose, onSave }: NewsEventFormPr
             <div className="space-y-3">
               {formData.images.map((url, index) => (
                 <div key={index} className="flex gap-2 items-center bg-gray-50 p-2 rounded-lg">
-                  <img src={url} alt="" className="w-16 h-16 object-cover rounded" />
+                  <Image src={getImageUrl(url)} alt="" width={64} height={64} className="object-cover rounded" />
                   <span className="flex-1 text-sm text-gray-600 truncate">{url}</span>
                   <button
                     type="button"

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Heart, Search, Eye, Pause, Play, XCircle } from 'lucide-react';
 import Link from 'next/link';
+import { getValidAccessToken } from '../login/actions';
 
 interface Fellowship {
   _id: string;
@@ -30,7 +31,7 @@ export default function FellowshipsPage() {
 
   const fetchFellowships = async () => {
     try {
-      const token = document.cookie.split('; ').find(row => row.startsWith('admin_token='))?.split('=')[1];
+      const token = await getValidAccessToken();
       const params = new URLSearchParams({
         page: pagination.page.toString(),
         limit: '20',

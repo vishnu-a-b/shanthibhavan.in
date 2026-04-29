@@ -12,11 +12,23 @@ interface VolunteerRequestBody {
   status?: 'pending' | 'approved' | 'rejected';
 }
 
-// GET all volunteers
-router.get('/', async (_req: Request, res: Response): Promise<void> => {
+// GET all volunteers with pagination
+router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
-    const volunteers: IVolunteerDocument[] = await Volunteer.find().sort({ createdAt: -1 });
-    res.json(volunteers);
+    const page = Math.max(1, parseInt(req.query.page as string) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(req.query.limit as string) || 20));
+    const skip = (page - 1) * limit;
+
+    const [volunteers, total] = await Promise.all([
+      Volunteer.find().sort({ createdAt: -1 }).skip(skip).limit(limit),
+      Volunteer.countDocuments()
+    ]);
+
+    res.json({
+      success: true,
+      volunteers,
+      pagination: { page, limit, total, pages: Math.ceil(total / limit) }
+    });
   } catch (error) {
     console.error('Error fetching volunteers:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch volunteers' });

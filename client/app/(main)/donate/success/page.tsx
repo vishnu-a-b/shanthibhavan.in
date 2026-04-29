@@ -4,13 +4,43 @@ import { useSearchParams } from 'next/navigation';
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/Card";
 import Link from "next/link";
-import { CheckCircle, Download, Home, Heart } from "lucide-react";
-import { Suspense } from 'react';
+import { CheckCircle, Download, Home, Heart, Loader2 } from "lucide-react";
+import { Suspense, useState } from 'react';
+
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
 
 function SuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
   const receiptNumber = searchParams.get('receiptNumber');
+
+  const [downloading, setDownloading] = useState(false);
+
+  const downloadReceipt = async () => {
+    if (!receiptNumber) return;
+    setDownloading(true);
+    try {
+      const res = await fetch(`${API_URL}/api/donation/receipt/download/${receiptNumber}`);
+      if (!res.ok) {
+        alert('Receipt not ready yet. Please try again shortly.');
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${receiptNumber}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      alert('Failed to download receipt. Please try again.');
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-white">
@@ -56,18 +86,27 @@ function SuccessContent() {
               <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg">
                 <h4 className="font-medium text-blue-800 mb-2">What&apos;s Next?</h4>
                 <ul className="text-sm text-blue-700 space-y-1 list-disc ml-4">
-                  <li>A confirmation email has been sent to your email address.</li>
-                  <li>If you provided your PAN, you&apos;ll receive an 80G receipt for tax exemption.</li>
-                  <li>Your receipt will be available for download within 24 hours.</li>
+                  <li>A confirmation email with your receipt has been sent to your email address.</li>
+                  <li>If you provided your PAN, your 80G receipt is attached to that email.</li>
+                  <li>You can also download your receipt directly using the button below.</li>
                 </ul>
               </div>
 
               {/* Actions */}
               <div className="flex flex-col sm:flex-row gap-4">
                 {receiptNumber && (
-                  <Button variant="outline" className="flex-1">
-                    <Download className="w-4 h-4 mr-2" />
-                    Download Receipt
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={downloadReceipt}
+                    disabled={downloading}
+                  >
+                    {downloading ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Download className="w-4 h-4 mr-2" />
+                    )}
+                    {downloading ? 'Downloading...' : 'Download Receipt'}
                   </Button>
                 )}
                 <Button asChild className="flex-1">

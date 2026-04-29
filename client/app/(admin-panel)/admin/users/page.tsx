@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Users, Plus, Edit, Trash2, Shield, X } from 'lucide-react';
+import { getValidAccessToken } from '../login/actions';
 
 interface Admin {
   id: string;
@@ -36,14 +37,11 @@ export default function AdminUsersPage() {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const getToken = () => {
-    return document.cookie.split('; ').find(row => row.startsWith('admin_token='))?.split('=')[1];
-  };
-
   const fetchAdmins = async () => {
     try {
+      const token = await getValidAccessToken();
       const res = await fetch(`${API_URL}/api/admin/users`, {
-        headers: { Authorization: `Bearer ${getToken()}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (data.success) {
@@ -66,13 +64,14 @@ export default function AdminUsersPage() {
     setError('');
 
     try {
+      const token = await getValidAccessToken();
       if (editingAdmin) {
         // Update existing admin
         const res = await fetch(`${API_URL}/api/admin/users/${editingAdmin.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${getToken()}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
             username: formData.username,
@@ -93,7 +92,7 @@ export default function AdminUsersPage() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${getToken()}`,
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(formData),
         });
@@ -116,9 +115,10 @@ export default function AdminUsersPage() {
     if (!confirm(`Are you sure you want to deactivate ${admin.username}?`)) return;
 
     try {
+      const token = await getValidAccessToken();
       const res = await fetch(`${API_URL}/api/admin/users/${admin.id}`, {
         method: 'DELETE',
-        headers: { Authorization: `Bearer ${getToken()}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (data.success) {

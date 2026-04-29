@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { History, Download, Filter } from 'lucide-react';
+import { getValidAccessToken } from '../../login/actions';
 
 interface Donation {
   _id: string;
@@ -30,7 +31,7 @@ export default function DonationHistoryPage() {
 
   const fetchHistory = async () => {
     try {
-      const token = document.cookie.split('; ').find(row => row.startsWith('admin_token='))?.split('=')[1];
+      const token = await getValidAccessToken();
       const params = new URLSearchParams({
         page: pagination.page.toString(),
         limit: '20',

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Clock, AlertTriangle, Mail, Phone } from 'lucide-react';
+import { getValidAccessToken } from '../../login/actions';
 
 interface Fellowship {
   _id: string;
@@ -25,7 +26,7 @@ export default function OverduePaymentsPage() {
   useEffect(() => {
     const fetchOverdue = async () => {
       try {
-        const token = document.cookie.split('; ').find(row => row.startsWith('admin_token='))?.split('=')[1];
+        const token = await getValidAccessToken();
         const res = await fetch(`${API_URL}/api/fellowship/overdue`, {
           headers: { Authorization: `Bearer ${token}` },
         });

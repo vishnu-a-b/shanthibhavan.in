@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import Donation, { DonationType, PaymentStatus, ApprovalStatus } from './donation.model.js';
+import Transaction, { TransactionType } from './transaction.model.js';
 import emailService from '../../services/email.service.js';
+import { buildReceiptBuffer } from '../../services/receipt-pdf.service.js';
 
 /**
  * Add offline payment (Agent role)
@@ -33,6 +35,11 @@ export const addOfflinePayment = async (req: Request, res: Response): Promise<vo
         success: false,
         error: 'Required fields: donorName, email, amount, offlinePaymentMethod'
       });
+      return;
+    }
+
+    if (phone && !/^[+\d\s\-()\\.]{7,20}$/.test(phone)) {
+      res.status(400).json({ success: false, error: 'Invalid phone number format' });
       return;
     }
 
@@ -138,14 +145,41 @@ export const approveOfflinePayment = async (req: Request, res: Response): Promis
 
     await donation.save();
 
-    // Send confirmation email to donor
-    emailService.sendOfflineDonationApproved({
-      email: donation.email,
-      donorName: donation.donorName,
-      amount: donation.amount,
-      currency: donation.currency,
-      receiptNumber: donation.receiptNumber || undefined
-    }).catch(err => console.error('Failed to send approval email:', err));
+    // Audit log
+    await Transaction.create({
+      donationId: donation._id,
+      transactionType: TransactionType.OFFLINE_APPROVED,
+      requestPayload: { approvedBy: req.admin._id, approvedAt: new Date() },
+      orderId: donation.gatewayOrderId,
+      success: true,
+      ipAddress: req.ip
+    });
+
+    // Send confirmation email with receipt PDF attached
+    (async () => {
+      let receiptPdf: Buffer | undefined;
+      if (donation.receiptNumber) {
+        try {
+          receiptPdf = await buildReceiptBuffer({
+            name: donation.donorName,
+            amount: donation.amount,
+            date: new Date(donation.createdAt).toLocaleDateString('en-IN'),
+            phoneNo: donation.phone || '',
+            address: donation.address || '',
+            transactionNumber: donation.offlinePaymentMethod || 'Offline',
+            receiptNumber: donation.receiptNumber,
+          });
+        } catch { /* pdf error is non-fatal */ }
+      }
+      emailService.sendOfflineDonationApproved({
+        email: donation.email,
+        donorName: donation.donorName,
+        amount: donation.amount,
+        currency: donation.currency,
+        receiptNumber: donation.receiptNumber || undefined,
+        receiptPdf,
+      }).catch(err => console.error('Failed to send approval email:', err));
+    })();
 
     res.json({
       success: true,
@@ -207,6 +241,16 @@ export const rejectOfflinePayment = async (req: Request, res: Response): Promise
     donation.rejectionReason = reason;
 
     await donation.save();
+
+    // Audit log
+    await Transaction.create({
+      donationId: donation._id,
+      transactionType: TransactionType.OFFLINE_REJECTED,
+      requestPayload: { rejectedBy: req.admin._id, reason, rejectedAt: new Date() },
+      orderId: donation.gatewayOrderId,
+      success: false,
+      ipAddress: req.ip
+    });
 
     // Send rejection email to donor
     emailService.sendOfflineDonationRejected({

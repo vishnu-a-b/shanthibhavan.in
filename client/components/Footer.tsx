@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Mail, MapPin, Phone, MessageCircle, Eye } from 'lucide-react';
 import { getFooterContent } from '@/app/actions/footer';
 import connectToDatabase from '@/lib/db';
@@ -87,7 +88,7 @@ export default async function Footer() {
         <div className="grid grid-cols-1 gap-8 md:grid-cols-4">
           <div className="space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <img src="/logo/logo.png" alt="Shanthibhavan Logo" className="h-16 w-auto" />
+              <Image src="/logo/logo.png" alt="Shanthibhavan Logo" width={120} height={64} className="h-16 w-auto" />
               <div className="flex flex-col">
                 <span className="text-lg font-bold text-white leading-tight">Shanthibhavan</span>
                 <span className="text-xs font-semibold text-zinc-500">Palliative Hospital</span>

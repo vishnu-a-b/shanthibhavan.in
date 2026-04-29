@@ -62,15 +62,6 @@ export async function login(formData: FormData) {
         path: '/',
       });
 
-      // Store token accessible to client-side JS for API calls
-      cookieStore.set('admin_token', data.accessToken, {
-        httpOnly: false,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 15,
-        path: '/',
-      });
-
       // Store admin info (non-sensitive, for UI)
       cookieStore.set('admin_info', JSON.stringify({
         id: data.admin.id,
@@ -104,7 +95,6 @@ export async function login(formData: FormData) {
 export async function logout() {
   const cookieStore = await cookies();
   cookieStore.delete('admin_access_token');
-  cookieStore.delete('admin_token');
   cookieStore.delete('admin_refresh_token');
   cookieStore.delete('admin_info');
   redirect('/admin/login');
@@ -133,14 +123,6 @@ export async function refreshAccessToken() {
       // Update tokens
       cookieStore.set('admin_access_token', data.accessToken, {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 15,
-        path: '/',
-      });
-
-      cookieStore.set('admin_token', data.accessToken, {
-        httpOnly: false,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 60 * 15,

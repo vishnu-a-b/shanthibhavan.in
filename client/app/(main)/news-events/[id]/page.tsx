@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Calendar, ArrowLeft, Tag, Share2 } from "lucide-react";
 import RevealAnimation from "@/components/RevealAnimation";
 import { getImageUrl } from "@/lib/image-url";
+import Image from "next/image";
 
 export const dynamic = 'force-dynamic';
 
@@ -71,10 +72,11 @@ export default async function NewsEventDetailPage({ params }: { params: { id: st
               {/* Main Image */}
               {item.images && item.images[0] && (
                 <div className="relative aspect-video w-full overflow-hidden">
-                  <img
+                  <Image
+                    fill
                     src={getImageUrl(item.images[0])}
                     alt={item.title}
-                    className="w-full h-full object-cover"
+                    className="object-cover"
                   />
                 </div>
               )}
@@ -100,8 +102,8 @@ export default async function NewsEventDetailPage({ params }: { params: { id: st
                 {item.images && item.images.length > 1 && (
                   <div className="grid grid-cols-2 gap-4 mt-12">
                     {item.images.slice(1).map((img: string, i: number) => (
-                      <div key={i} className="rounded-2xl overflow-hidden aspect-square shadow-lg">
-                         <img src={getImageUrl(img)} className="w-full h-full object-cover" alt={`${item.title} gallery ${i}`} />
+                      <div key={i} className="relative rounded-2xl overflow-hidden aspect-square shadow-lg">
+                        <Image fill src={getImageUrl(img)} className="object-cover" alt={`${item.title} gallery ${i}`} />
                       </div>
                     ))}
                   </div>
