@@ -1,6 +1,7 @@
 import PDFDocument from "pdfkit";
 import { Response } from "express";
-import { toWords } from "number-to-words";
+import pkg from "number-to-words";
+const { toWords } = pkg;
 import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
