@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import Donation, { DonationType, PaymentStatus, ApprovalStatus } from './donation.model.js';
 import Transaction, { TransactionType } from './transaction.model.js';
+import Campaign from '../campaign/campaign.model.js';
 import emailService from '../../services/email.service.js';
-import { buildReceiptBuffer } from '../../services/receipt-pdf.service.js';
+import whatsappHelper from '../../services/whatsapp.service.js';
+import { buildReceiptBuffer, saveReceiptToFile } from '../../services/receipt-pdf.service.js';
 
 /**
  * Add offline payment (Agent role)
@@ -23,6 +25,7 @@ export const addOfflinePayment = async (req: Request, res: Response): Promise<vo
       phone,
       amount,
       donationType = DonationType.GENERAL,
+      campaignId,
       panNumber,
       address,
       notes,
@@ -51,6 +54,18 @@ export const addOfflinePayment = async (req: Request, res: Response): Promise<vo
       return;
     }
 
+    if (donationType === DonationType.CAMPAIGN) {
+      if (!campaignId) {
+        res.status(400).json({ success: false, error: 'campaignId is required for campaign donations' });
+        return;
+      }
+      const campaign = await Campaign.findById(campaignId);
+      if (!campaign) {
+        res.status(404).json({ success: false, error: 'Campaign not found' });
+        return;
+      }
+    }
+
     // Create offline donation record
     const donation = await Donation.create({
       donorName,
@@ -60,6 +75,7 @@ export const addOfflinePayment = async (req: Request, res: Response): Promise<vo
       address,
       amount,
       donationType,
+      ...(campaignId && { campaignId }),
       notes,
       isOffline: true,
       offlinePaymentMethod,
@@ -92,6 +108,7 @@ export const getPendingApprovals = async (_req: Request, res: Response): Promise
       approvalStatus: ApprovalStatus.PENDING
     })
       .populate('addedBy', 'username email')
+      .populate('campaignId', 'title slug')
       .sort({ createdAt: -1 });
 
     res.json({
@@ -145,6 +162,14 @@ export const approveOfflinePayment = async (req: Request, res: Response): Promis
 
     await donation.save();
 
+    // Update campaign stats if this is a campaign donation
+    if (donation.campaignId) {
+      await Campaign.findByIdAndUpdate(donation.campaignId, {
+        $inc: { raisedAmount: donation.amount, donorCount: 1 },
+        $push: { donations: donation._id }
+      });
+    }
+
     // Audit log
     await Transaction.create({
       donationId: donation._id,
@@ -155,11 +180,32 @@ export const approveOfflinePayment = async (req: Request, res: Response): Promis
       ipAddress: req.ip
     });
 
-    // Send confirmation email with receipt PDF attached
+    // Generate receipt PDF, save to file, send email + WhatsApp
     (async () => {
-      let receiptPdf: Buffer | undefined;
       if (donation.receiptNumber) {
+        let receiptPdf: Buffer | undefined;
+
         try {
+          const campaignName = donation.campaignId
+            ? (await Campaign.findById(donation.campaignId).select('title'))?.title
+            : undefined;
+
+          const receiptUrl = await saveReceiptToFile({
+            name: donation.donorName,
+            amount: donation.amount,
+            date: new Date(donation.createdAt).toLocaleDateString('en-IN'),
+            phoneNo: donation.phone || '',
+            address: donation.address || '',
+            transactionNumber: donation.offlinePaymentMethod || 'Offline',
+            receiptNumber: donation.receiptNumber,
+            programName: campaignName,
+          });
+
+          await Donation.findByIdAndUpdate(donation._id, {
+            receiptUrl,
+            receiptGenerated: true,
+          });
+
           receiptPdf = await buildReceiptBuffer({
             name: donation.donorName,
             amount: donation.amount,
@@ -168,17 +214,29 @@ export const approveOfflinePayment = async (req: Request, res: Response): Promis
             address: donation.address || '',
             transactionNumber: donation.offlinePaymentMethod || 'Offline',
             receiptNumber: donation.receiptNumber,
+            programName: campaignName,
           });
-        } catch { /* pdf error is non-fatal */ }
+        } catch (err) {
+          console.error('Receipt generation error (non-fatal):', err);
+        }
+
+        emailService.sendOfflineDonationApproved({
+          email: donation.email,
+          donorName: donation.donorName,
+          amount: donation.amount,
+          currency: donation.currency,
+          receiptNumber: donation.receiptNumber,
+          receiptPdf,
+        }).catch(err => console.error('Failed to send approval email:', err));
+
+        if (donation.phone && receiptPdf) {
+          whatsappHelper.sendDonationReceipt(
+            donation.phone,
+            receiptPdf,
+            `${donation.receiptNumber}.pdf`
+          ).catch(err => console.error('Failed to send WhatsApp receipt:', err));
+        }
       }
-      emailService.sendOfflineDonationApproved({
-        email: donation.email,
-        donorName: donation.donorName,
-        amount: donation.amount,
-        currency: donation.currency,
-        receiptNumber: donation.receiptNumber || undefined,
-        receiptPdf,
-      }).catch(err => console.error('Failed to send approval email:', err));
     })();
 
     res.json({
@@ -272,6 +330,75 @@ export const rejectOfflinePayment = async (req: Request, res: Response): Promise
       success: false,
       error: 'Failed to reject payment'
     });
+  }
+};
+
+/**
+ * Edit a pending offline payment (Agent / Super Admin)
+ */
+export const editOfflinePayment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.admin) {
+      res.status(401).json({ success: false, error: 'Authentication required' });
+      return;
+    }
+
+    const { id } = req.params;
+
+    const donation = await Donation.findOne({
+      _id: id,
+      isOffline: true,
+      approvalStatus: ApprovalStatus.PENDING,
+    });
+
+    if (!donation) {
+      res.status(404).json({ success: false, error: 'Pending offline donation not found' });
+      return;
+    }
+
+    const allowedFields = ['donorName', 'email', 'phone', 'amount', 'donationType', 'campaignId', 'panNumber', 'address', 'notes', 'offlinePaymentMethod'];
+    for (const field of allowedFields) {
+      if (req.body[field] !== undefined) {
+        (donation as any)[field] = req.body[field];
+      }
+    }
+
+    await donation.save();
+
+    res.json({ success: true, donation, message: 'Offline payment updated' });
+  } catch (error) {
+    console.error('Edit offline payment error:', error);
+    res.status(500).json({ success: false, error: 'Failed to update offline payment' });
+  }
+};
+
+/**
+ * Delete a pending offline payment (Agent / Super Admin)
+ */
+export const deleteOfflinePayment = async (req: Request, res: Response): Promise<void> => {
+  try {
+    if (!req.admin) {
+      res.status(401).json({ success: false, error: 'Authentication required' });
+      return;
+    }
+
+    const { id } = req.params;
+
+    const donation = await Donation.findOneAndDelete({
+      _id: id,
+      isOffline: true,
+      approvalStatus: ApprovalStatus.PENDING,
+    });
+
+    if (!donation) {
+      res.status(404).json({ success: false, error: 'Pending offline donation not found or already processed' });
+      return;
+    }
+
+    res.json({ success: true, message: 'Offline payment deleted' });
+  } catch (error) {
+    console.error('Delete offline payment error:', error);
+    res.status(500).json({ success: false, error: 'Failed to delete offline payment' });
   }
 };
 

@@ -109,6 +109,8 @@ const menuItems: MenuItem[] = [
   // Campaign Management
   { icon: Target, label: 'All Campaigns', href: '/admin/campaigns', category: 'campaigns', roles: ['super_admin', 'accounts'] },
   { icon: PlusCircle, label: 'Create Campaign', href: '/admin/campaigns/create', category: 'campaigns', roles: ['super_admin'] },
+  { icon: PlusCircle, label: 'Add Campaign Payment', href: '/admin/campaigns/add-payment', category: 'campaigns', roles: ['super_admin', 'agent'] },
+  { icon: CreditCard, label: 'Campaign Payments', href: '/admin/campaigns/payments', category: 'campaigns', roles: ['super_admin', 'accounts', 'approver'] },
   { icon: BarChart3, label: 'Campaign Stats', href: '/admin/campaigns/stats', category: 'campaigns', roles: ['super_admin', 'accounts'] },
 
   // Operations - Super Admin

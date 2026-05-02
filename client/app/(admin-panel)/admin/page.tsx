@@ -8,25 +8,35 @@ import {
   Mail,
   TrendingUp,
   DollarSign,
+  Target,
 } from 'lucide-react';
 import AnimatedCounter from '@/components/AnimatedCounter';
 import RevealAnimation from '@/components/RevealAnimation';
+import { getValidAccessToken } from './login/actions';
+
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
+const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
+  const [campaignStats, setCampaignStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/stats')
-      .then((res) => res.json())
-      .then((data) => {
-        setStats(data);
-        setLoading(false);
+    getValidAccessToken().then(token =>
+      Promise.all([
+        fetch('/api/stats').then((res) => res.json()),
+        fetch(`${API_URL}/api/campaign/stats`, { headers: { Authorization: `Bearer ${token}` } }).then((res) => res.json()),
+      ])
+    )
+      .then(([statsData, campaignData]) => {
+        setStats(statsData);
+        if (campaignData.success) setCampaignStats(campaignData.stats);
       })
       .catch((error) => {
         console.error('Error fetching stats:', error);
-        setLoading(false);
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -106,6 +116,29 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
         </RevealAnimation>
+
+        {campaignStats && (
+          <RevealAnimation delay={0.3}>
+            <Card className="border-2 border-secondary/30 hover:border-secondary transition-all hover-lift shadow-lg hover:shadow-xl bg-gradient-to-br from-white to-secondary/5">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">
+                  Active Campaigns
+                </CardTitle>
+                <div className="w-12 h-12 bg-secondary/20 rounded-full flex items-center justify-center">
+                  <Target className="h-6 w-6 text-primary" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-primary">
+                  <AnimatedCounter end={campaignStats?.activeCount || 0} />
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  ₹{(campaignStats?.activeRaised || 0).toLocaleString('en-IN')} raised across campaigns
+                </p>
+              </CardContent>
+            </Card>
+          </RevealAnimation>
+        )}
       </div>
 
       {/* Recent Activity Section */}

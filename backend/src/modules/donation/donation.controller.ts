@@ -294,7 +294,7 @@ export const verifyRazorpayPayment = async (req: Request, res: Response): Promis
       ipAddress: req.ip,
     });
 
-    // Send success email with receipt PDF attached
+    // Send success email + WhatsApp receipt
     (async () => {
       let receiptPdf: Buffer | undefined;
       if (donation.receiptNumber) {
@@ -310,6 +310,7 @@ export const verifyRazorpayPayment = async (req: Request, res: Response): Promis
           });
         } catch { /* pdf error is non-fatal */ }
       }
+
       emailService.sendDonationSuccess({
         email: donation.email,
         donorName: donation.donorName,
@@ -321,6 +322,14 @@ export const verifyRazorpayPayment = async (req: Request, res: Response): Promis
         paymentMethod: 'razorpay',
         receiptPdf,
       }).catch(err => console.error('Failed to send success email:', err));
+
+      if (donation.phone && receiptPdf && donation.receiptNumber) {
+        whatsappHelper.sendDonationReceipt(
+          donation.phone,
+          receiptPdf,
+          `${donation.receiptNumber}.pdf`
+        ).catch(err => console.error('Failed to send WhatsApp receipt:', err));
+      }
     })();
 
     res.json({
@@ -445,6 +454,7 @@ export const listDonations = async (req: Request, res: Response): Promise<void> 
       Donation.find(filter)
         .populate('addedBy', 'username email')
         .populate('approvedBy', 'username email')
+        .populate('campaignId', 'title slug')
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(Number(limit)),

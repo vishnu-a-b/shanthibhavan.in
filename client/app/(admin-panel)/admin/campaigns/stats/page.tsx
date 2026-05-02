@@ -14,6 +14,7 @@ import {
   ArrowUpRight,
   BarChart3
 } from 'lucide-react';
+import { getValidAccessToken } from '../../login/actions';
 
 const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
 const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
@@ -40,8 +41,9 @@ export default function CampaignStatsPage() {
 
   const fetchStats = async () => {
     try {
+      const token = await getValidAccessToken();
       const res = await fetch(`${API_URL}/api/campaign/stats`, {
-        credentials: 'include'
+        headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
