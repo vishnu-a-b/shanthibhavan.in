@@ -16,6 +16,7 @@ import {
   XCircle,
   PauseCircle
 } from 'lucide-react';
+import { getValidAccessToken } from '../login/actions';
 
 interface Campaign {
   _id: string;
@@ -56,6 +57,7 @@ export default function CampaignsPage() {
 
   const fetchCampaigns = async () => {
     try {
+      const token = await getValidAccessToken();
       const params = new URLSearchParams({
         page: pagination.page.toString(),
         limit: pagination.limit.toString()
@@ -63,7 +65,7 @@ export default function CampaignsPage() {
       if (statusFilter) params.append('status', statusFilter);
 
       const res = await fetch(`${API_URL}/api/campaign?${params}`, {
-        credentials: 'include'
+        headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {
@@ -79,10 +81,10 @@ export default function CampaignsPage() {
 
   const updateStatus = async (id: string, status: string) => {
     try {
+      const token = await getValidAccessToken();
       const res = await fetch(`${API_URL}/api/campaign/${id}/status`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ status })
       });
       const data = await res.json();
@@ -101,9 +103,10 @@ export default function CampaignsPage() {
     if (!confirm('Are you sure you want to delete this campaign?')) return;
 
     try {
+      const token = await getValidAccessToken();
       const res = await fetch(`${API_URL}/api/campaign/${id}`, {
         method: 'DELETE',
-        credentials: 'include'
+        headers: { Authorization: `Bearer ${token}` }
       });
       const data = await res.json();
       if (data.success) {

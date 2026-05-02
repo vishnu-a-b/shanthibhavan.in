@@ -14,7 +14,9 @@ import {
   getPendingApprovals,
   approveOfflinePayment,
   rejectOfflinePayment,
-  getOfflinePaymentHistory
+  getOfflinePaymentHistory,
+  editOfflinePayment,
+  deleteOfflinePayment,
 } from './offline.controller.js';
 import { requireAuth, requireRole } from '../../middleware/auth.middleware.js';
 import { AdminRole } from '../admin/admin.model.js';
@@ -63,6 +65,18 @@ router.put('/:id/reject',
   requireAuth,
   requireRole(AdminRole.APPROVER, AdminRole.SUPER_ADMIN),
   rejectOfflinePayment
+);
+
+router.put('/:id/offline',
+  requireAuth,
+  requireRole(AdminRole.AGENT, AdminRole.SUPER_ADMIN),
+  editOfflinePayment
+);
+
+router.delete('/:id/offline',
+  requireAuth,
+  requireRole(AdminRole.AGENT, AdminRole.SUPER_ADMIN),
+  deleteOfflinePayment
 );
 
 export default router;

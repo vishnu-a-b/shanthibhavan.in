@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Target, ArrowLeft, Save, Loader2 } from 'lucide-react';
 import MediaUpload from '@/components/admin/MediaUpload';
+import { getValidAccessToken } from '../../login/actions';
 
 const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
 const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
@@ -45,10 +46,10 @@ export default function CreateCampaignPage() {
     setLoading(true);
 
     try {
+      const token = await getValidAccessToken();
       const res = await fetch(`${API_URL}/api/campaign`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           ...form,
           goalAmount: parseFloat(form.goalAmount),

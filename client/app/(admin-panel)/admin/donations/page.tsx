@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Download, Eye, X, User, CreditCard, FileText, Building2 } from 'lucide-react';
 import { getValidAccessToken } from '../login/actions';
 
@@ -48,13 +48,14 @@ const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
 
 export default function DonationsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [donations, setDonations] = useState<Donation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [generatingReceipt, setGeneratingReceipt] = useState<string | null>(null);
   const [selectedDonation, setSelectedDonation] = useState<DonationDetail | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
-  const [filter, setFilter] = useState({ status: '', type: '', startDate: '', endDate: '', search: '' });
+  const [filter, setFilter] = useState({ status: '', type: searchParams.get('type') || '', startDate: '', endDate: '', search: '' });
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, pages: 0 });
 
   const fetchDonations = async () => {
@@ -208,6 +209,7 @@ export default function DonationsPage() {
             <option value="">All Types</option>
             <option value="general">General</option>
             <option value="fellowship">Fellowship</option>
+            <option value="campaign">Campaign</option>
           </select>
           <input
             type="date"
