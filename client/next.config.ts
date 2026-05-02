@@ -16,7 +16,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'api.donatebed.palliativeindia.in',
+        hostname: 'api.gift.shanthibhavan.in',
         pathname: '/**',
       },
       {

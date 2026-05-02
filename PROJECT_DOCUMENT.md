@@ -7,7 +7,7 @@
 | Environment | URL |
 |-------------|-----|
 | Frontend | https://palliativeindia.in |
-| Backend API | https://api.donatebed.palliativeindia.in |
+| Backend API | https://api.gift.shanthibhavan.in |
 | Dev Frontend | http://127.0.0.1:3000 |
 | Dev Backend | http://127.0.0.1:5002 |
 
@@ -672,7 +672,7 @@ BILLDESK_KEY_ID=...
 BILLDESK_ENCRYPTION_KEY=...
 BILLDESK_SIGNING_KEY=...
 
-BACKEND_URL=https://api.donatebed.palliativeindia.in
+BACKEND_URL=https://api.gift.shanthibhavan.in
 FRONTEND_URL=https://palliativeindia.in
 CUSTOMER_IP=103.99.205.104
 
@@ -687,7 +687,7 @@ EMAIL_FROM_NAME=Shanthi Bhavan
 
 ```env
 NEXT_PUBLIC_API_URL=http://127.0.0.1:5002
-NEXT_PUBLIC_BACKEND_IMAGE_URL=https://api.donatebed.palliativeindia.in
+NEXT_PUBLIC_BACKEND_IMAGE_URL=https://api.gift.shanthibhavan.in
 ```
 
 ---
@@ -723,7 +723,7 @@ npm run seed:all     # Seed all content
 | Component | Service |
 |-----------|---------|
 | Frontend | Vercel (https://palliativeindia.in) |
-| Backend | Node.js server (https://api.donatebed.palliativeindia.in) |
+| Backend | Node.js server (https://api.gift.shanthibhavan.in) |
 | Database | MongoDB Atlas |
 | Email | Gmail SMTP |
 | Payments | BillDesk Gateway |
