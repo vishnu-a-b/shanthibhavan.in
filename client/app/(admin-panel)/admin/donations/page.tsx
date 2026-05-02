@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Download, Eye, X, User, CreditCard, FileText, Building2 } from 'lucide-react';
 import { getValidAccessToken } from '../login/actions';
@@ -47,6 +47,14 @@ const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
 
 
 export default function DonationsPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-gray-500">Loading...</div>}>
+      <DonationsPageInner />
+    </Suspense>
+  );
+}
+
+function DonationsPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [donations, setDonations] = useState<Donation[]>([]);
