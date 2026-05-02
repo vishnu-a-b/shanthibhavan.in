@@ -17,12 +17,12 @@ export const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : raw
  * @example
  * // Relative path (new format)
  * getImageUrl('/public/images/123-abc.jpg')
- * // Returns: https://api.donatebed.palliativeindia.in/public/images/123-abc.jpg
+ * // Returns: https://api.gift.shanthibhavan.in/public/images/123-abc.jpg
  *
  * @example
  * // Old localhost URL (legacy data)
  * getImageUrl('http://127.0.0.1:5002/public/images/123-abc.jpg')
- * // Returns: https://api.donatebed.palliativeindia.in/public/images/123-abc.jpg
+ * // Returns: https://api.gift.shanthibhavan.in/public/images/123-abc.jpg
  */
 export function getImageUrl(url: string | undefined | null): string {
   if (!url) return '';
