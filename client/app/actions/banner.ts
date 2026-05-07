@@ -2,13 +2,16 @@
 
 import API_BASE_URL from '@/lib/api';
 
-export async function getBanners(location?: string) {
+export async function getBanners(location?: string, all?: boolean) {
   try {
     const url = new URL(`${API_BASE_URL}/banner`);
     if (location) {
       url.searchParams.append('location', location);
     }
-    
+    if (all) {
+      url.searchParams.append('all', 'true');
+    }
+
     const response = await fetch(url.toString(), {
       cache: 'no-store',
     });
@@ -89,7 +92,7 @@ export async function deleteBanner(id: string) {
 export async function seedBenevityBanners() {
   try {
     // Use API_BASE_URL directly, it already handles the backend location
-    const response = await fetch(`${API_BASE_URL}/benevity/banners/seed`, {
+    const response = await fetch(`${API_BASE_URL}/banner/seed`, {
       method: 'POST',
       cache: 'no-store',
     });

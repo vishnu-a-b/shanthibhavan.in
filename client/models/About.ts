@@ -45,7 +45,7 @@ const AboutSchema = new Schema<IAbout>({
   homeTitle: { type: String, default: 'The First Palliative Hospital in India' },
   homeBadge: { type: String, default: 'Established 1993' },
   homeIntro: { type: String, default: 'Shanthibhavan Palliative Hospital operates as a division of the Franciscan Sisters of St. Clare Charitable Trust.' },
-  homeDescription: { type: String, default: 'We function as a no-bill hospital with 49 beds, providing comprehensive palliative care without bills and cash counters. Our aim is to improve the quality of life of people with life-limiting or disabling diseases.' },
+  homeDescription: { type: String, default: 'We function as a no-bill hospital with beds, providing comprehensive palliative care without bills and cash counters. Our aim is to improve the quality of life of people with life-limiting or disabling diseases.' },
   homeImage: { type: String, default: 'https://shanthibhavan.in/images/products/5b46fcb5b0482.jpeg' },
   homeButtonText: { type: String, default: 'Learn More About Us' },
   homeButtonLink: { type: String, default: '/about' },

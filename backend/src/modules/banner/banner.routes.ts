@@ -84,20 +84,15 @@ router.post('/seed', async (_req: Request, res: Response): Promise<void> => {
   }
 });
 
-// GET all active banners
+// GET banners — public returns only active; pass ?all=true for admin (all statuses)
 router.get('/', async (req: Request, res: Response): Promise<void> => {
   try {
     const location = req.query.location as string;
-    const filter: any = { isActive: true };
+    const all = req.query.all === 'true';
+    const filter: any = all ? {} : { isActive: true };
     if (location) {
       filter.location = location;
     }
-    
-    // If no location specified, maybe return all? 
-    // Or if we want to restrict homepage to 'home', we should default to 'home' if client doesn't specify?
-    // But admin might use this? Admin usually has separate route or uses this?
-    // If this is public API, let's allow filtering.
-    
     const banners: IBannerDocument[] = await Banner.find(filter).sort({ order: 1 });
     res.json({ success: true, banners });
   } catch (error) {

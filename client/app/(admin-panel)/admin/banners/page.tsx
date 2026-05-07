@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Plus, Video, Image as ImageIcon, Edit, Trash2, Database } from 'lucide-react';
+import { Plus, Video, Image as ImageIcon, Edit, Trash2, Database, Eye, EyeOff } from 'lucide-react';
 import RevealAnimation from '@/components/RevealAnimation';
 import BannerForm from '@/components/admin/BannerForm';
 
@@ -26,17 +26,7 @@ function BannersContent() {
     try {
       setLoading(true);
       const { getBanners } = await import('@/app/actions/banner');
-      // If we are on the benevity page, strictly fetch benevity.
-      // If we are on the home page (or default), fetch home (which includes backward compat).
-      // However, if the user navigates to /banners without param, we might want to show ALL?
-      // But the sidebar sends ?location=benevity or /banners (which implies home usually).
-      // Let's stick to the sidebar logic where "Hero Banners" -> all/home and "Benevity" -> benevity.
-      
-      // If no param is present, let's treat it as 'home' for now to match "Hero Banners"
-      // Or pass undefined if we want all.
-      // But getBanners('home') includes null locations.
-      
-      const data = await getBanners(locationParam || 'home'); 
+      const data = await getBanners(locationParam || 'home', true);
       setBanners(data);
       setLoading(false);
     } catch (error) {
@@ -77,6 +67,17 @@ function BannersContent() {
     } catch (error) {
       console.error('Error deleting banner:', error);
       alert('Failed to delete banner');
+    }
+  };
+
+  const handleToggleActive = async (banner: any) => {
+    try {
+      const { updateBanner } = await import('@/app/actions/banner');
+      await updateBanner(banner._id, { isActive: !banner.isActive });
+      fetchBanners();
+    } catch (error) {
+      console.error('Error toggling banner:', error);
+      alert('Failed to update banner');
     }
   };
 
@@ -241,6 +242,15 @@ function BannersContent() {
                     >
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleToggleActive(banner)}
+                      className={banner.isActive ? 'text-gray-600 hover:bg-gray-50' : 'text-green-600 hover:bg-green-50'}
+                      title={banner.isActive ? 'Deactivate' : 'Activate'}
+                    >
+                      {banner.isActive ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </Button>
                     <Button
                       variant="outline"
