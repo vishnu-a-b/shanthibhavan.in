@@ -1,4 +1,3 @@
-import dotenv from 'dotenv';
 import express, { Express, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
@@ -34,9 +33,6 @@ import footerRoutes from './modules/footer/footer.routes.js';
 import uploadRoutes from './modules/upload/upload.routes.js';
 import galleryRoutes from './modules/gallery/gallery.routes.js';
 import homepageSettingsRoutes from './modules/homepage-settings/homepage-settings.routes.js';
-
-// Load environment variables
-dotenv.config();
 
 const app: Express = express();
 

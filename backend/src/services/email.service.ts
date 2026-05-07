@@ -32,7 +32,7 @@ class EmailService {
     const pass = process.env.EMAIL_PASS?.replace(/\s+/g, '');
 
     if (!host || !user || !pass) {
-      console.warn('[Email] Configuration incomplete (EMAIL_HOST/EMAIL_USER/EMAIL_PASS missing). Email disabled.');
+      // Env vars not yet available (expected only at module load time before --env-file kicks in)
       return;
     }
 
