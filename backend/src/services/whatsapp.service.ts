@@ -6,7 +6,9 @@ import { fileURLToPath } from "url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 interface WhatsAppResponse {
-  messageId: string;
+  messageId?: string;
+  id?: string;
+  [key: string]: unknown;
 }
 
 const OMNI_API_URL =
@@ -21,6 +23,9 @@ const headers = () => ({
   Authorization: `Bearer ${getAuthToken()}`,
   "Content-Type": "application/json",
 });
+
+const extractMessageId = (data: WhatsAppResponse): string =>
+  data.messageId || data.id || "sent";
 
 export const whatsappHelper = {
   sendHiMessage: async (phoneNumber: string): Promise<string> => {
@@ -41,7 +46,7 @@ export const whatsappHelper = {
         { headers: headers() }
       );
       console.log("Hi message sent successfully!");
-      return response.data.messageId;
+      return extractMessageId(response.data);
     } catch (error) {
       console.error("Error sending Hi message:", error);
       if (axios.isAxiosError(error)) {
@@ -79,7 +84,7 @@ export const whatsappHelper = {
         { headers: headers() }
       );
       console.log("Supporter welcome message sent successfully!");
-      return response.data.messageId;
+      return extractMessageId(response.data);
     } catch (error) {
       console.error("Error sending supporter welcome message:", error);
       if (axios.isAxiosError(error)) {
@@ -110,7 +115,7 @@ export const whatsappHelper = {
     pdfBuffer: any,
     filename: string = `receipt_${Date.now()}.pdf`
   ): Promise<string> => {
-    console.log(`[WhatsApp] sendDonationReceipt: to=${phoneNumber}, file=${filename}, bufferSize=${pdfBuffer?.length ?? 'N/A'}`);
+    console.log(`[WhatsApp] sendDonationReceipt: to=${phoneNumber}, file=${filename}, bufferSize=${pdfBuffer?.length ?? "N/A"}`);
     try {
       const pdfUrl = await whatsappHelper.uploadPDFToStorage(pdfBuffer, filename);
       console.log(`[WhatsApp] PDF uploaded to: ${pdfUrl}`);
@@ -144,7 +149,8 @@ export const whatsappHelper = {
         { headers: headers() }
       );
 
-      console.log(`[WhatsApp] Donation receipt sent successfully! messageId=${response.data.messageId}`);
+      const msgId = extractMessageId(response.data);
+      console.log(`[WhatsApp] Donation receipt sent! messageId=${msgId}, fullResponse=${JSON.stringify(response.data)}`);
 
       setTimeout(() => {
         try {
@@ -155,7 +161,7 @@ export const whatsappHelper = {
         }
       }, 60000);
 
-      return response.data.messageId;
+      return msgId;
     } catch (error) {
       if (axios.isAxiosError(error)) {
         console.error(
@@ -204,7 +210,7 @@ export const whatsappHelper = {
         { headers: headers() }
       );
       console.log("Payment reminder message sent successfully!");
-      return response.data.messageId;
+      return extractMessageId(response.data);
     } catch (error) {
       console.error("Error sending payment reminder message:", error);
       if (axios.isAxiosError(error)) {
@@ -252,7 +258,7 @@ export const whatsappHelper = {
         { headers: headers() }
       );
       console.log("Fellowship payment receipt sent successfully!");
-      return response.data.messageId;
+      return extractMessageId(response.data);
     } catch (error) {
       console.error("Error sending fellowship payment receipt:", error);
       if (axios.isAxiosError(error)) {

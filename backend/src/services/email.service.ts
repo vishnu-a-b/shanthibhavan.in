@@ -1,14 +1,5 @@
 import nodemailer from 'nodemailer';
 
-interface EmailConfig {
-  host: string;
-  port: number;
-  secure: boolean;
-  auth: {
-    user: string;
-    pass: string;
-  };
-}
 
 interface EmailOptions {
   to: string;
@@ -37,24 +28,35 @@ class EmailService {
     const host = process.env.EMAIL_HOST;
     const port = parseInt(process.env.EMAIL_PORT || '587', 10);
     const user = process.env.EMAIL_USER;
-    const pass = process.env.EMAIL_PASS;
+    // Gmail App Passwords are shown with spaces for readability — strip them
+    const pass = process.env.EMAIL_PASS?.replace(/\s+/g, '');
 
     if (!host || !user || !pass) {
-      console.warn('Email configuration incomplete. Email notifications will be disabled.');
+      console.warn('[Email] Configuration incomplete (EMAIL_HOST/EMAIL_USER/EMAIL_PASS missing). Email disabled.');
       return;
     }
 
-    const config: EmailConfig = {
+    this.transporter = nodemailer.createTransport({
       host,
       port,
-      secure: port === 465,
-      auth: { user, pass }
-    };
+      secure: port === 465,       // true for SSL (465), false for STARTTLS (587)
+      requireTLS: port === 587,   // force STARTTLS on Gmail port 587
+      auth: { user, pass },
+      tls: { rejectUnauthorized: false }, // allow self-signed certs in some environments
+    });
 
-    this.transporter = nodemailer.createTransport(config);
+    console.log(`[Email] Transporter initialized: ${host}:${port}, user=${user}`);
   }
 
   async sendEmail(options: EmailOptions): Promise<boolean> {
+    // Lazy re-init: env vars are loaded by dotenv after module imports are hoisted,
+    // so the constructor may have run before EMAIL_* vars were available.
+    if (!this.transporter) {
+      this.fromEmail = process.env.EMAIL_FROM || 'noreply@shantibhavan.org';
+      this.fromName = process.env.EMAIL_FROM_NAME || 'Shanthibhavan Palliative India';
+      this.initTransporter();
+    }
+
     if (!this.transporter) {
       console.warn(`[Email] Transporter not configured. Skipping email to ${options.to}: ${options.subject}`);
       return false;
