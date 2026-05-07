@@ -4,7 +4,8 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
-import { Plus, Video, Image as ImageIcon, Edit, Trash2, Database, Eye, EyeOff } from 'lucide-react';
+import { Plus, Video, Image as ImageIcon, Edit, Trash2, Database, Eye, EyeOff, Info } from 'lucide-react';
+import Link from 'next/link';
 import RevealAnimation from '@/components/RevealAnimation';
 import BannerForm from '@/components/admin/BannerForm';
 
@@ -104,6 +105,26 @@ function BannersContent() {
             </p>
           </div>
           <div className="flex gap-2">
+          {currentLocation === 'home' && (
+              <Button
+               onClick={async () => {
+                 try {
+                   const { seedHomeBanner } = await import('@/app/actions/banner');
+                   const data = await seedHomeBanner();
+                   alert(data.message || (data.success ? 'Done!' : data.error));
+                   if (data.success) fetchBanners();
+                 } catch (err) {
+                   console.error(err);
+                   alert('Error seeding home banner.');
+                 }
+               }}
+               variant="outline"
+               className="gap-2"
+             >
+              <Database className="w-4 h-4" />
+              Seed Default Hero
+            </Button>
+            )}
           {currentLocation === 'benevity' && (
               <Button
                onClick={async () => {
@@ -140,6 +161,18 @@ function BannersContent() {
             </Button>
           </div>
         </div>
+
+        {/* Info callout for home hero */}
+        {currentLocation === 'home' && (
+          <div className="flex items-start gap-3 bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-4 text-sm text-blue-800">
+            <Info className="w-4 h-4 mt-0.5 shrink-0 text-blue-500" />
+            <span>
+              This page controls the <strong>hero banner</strong> content (title, description, media, CTA button).
+              The <strong>stats strip</strong> at the bottom of the hero (beds, vehicles, dialysis, no-bill) is managed from{' '}
+              <Link href="/admin/homepage-settings" className="underline font-semibold">Homepage Settings</Link>.
+            </span>
+          </div>
+        )}
 
         {/* Add/Edit Form */}
         {showForm && (

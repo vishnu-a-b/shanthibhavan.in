@@ -16,12 +16,13 @@ interface VideoHeroProps {
   ctaText?: string;
   ctaLink?: string;
   thumbnailUrl?: string;
+  heroStats?: { value: string; label: string }[];
 }
 
-const stats = [
+const DEFAULT_STATS = [
   { value: '49', label: 'Beds' },
   { value: '15+', label: 'Vehicles' },
-  { value: '40', label: 'Dialysis' },
+  { value: 'Free', label: 'Dialysis' },
   { value: '₹0', label: 'Bills' },
 ];
 
@@ -37,7 +38,9 @@ export default function VideoHero({
   ctaText,
   ctaLink,
   thumbnailUrl,
+  heroStats,
 }: VideoHeroProps) {
+  const stats = heroStats?.length ? heroStats : DEFAULT_STATS;
   return (
     <section
       className="relative w-full overflow-hidden flex flex-col"

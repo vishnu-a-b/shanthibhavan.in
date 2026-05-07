@@ -12,7 +12,6 @@ import {
   FileText,
   Settings,
   LogOut,
-  Home,
   Briefcase,
   Award,
   Newspaper,
@@ -73,7 +72,6 @@ const menuItems: MenuItem[] = [
   { icon: Users, label: 'Admin Users', href: '/admin/users', category: 'main', roles: ['super_admin'] },
 
   // CMS Content Management - Super Admin Only
-  { icon: Home, label: 'Homepage Sections', href: '/admin/homepage', category: 'cms', roles: ['super_admin'] },
   { icon: Settings, label: 'Homepage Settings', href: '/admin/homepage-settings', category: 'cms', roles: ['super_admin'] },
   { icon: Video, label: 'Hero Banners', href: '/admin/banners', category: 'cms', roles: ['super_admin'] },
   { icon: Info, label: 'About Us', href: '/admin/about', category: 'cms', roles: ['super_admin'] },
