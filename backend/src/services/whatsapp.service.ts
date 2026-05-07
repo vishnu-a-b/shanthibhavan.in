@@ -125,7 +125,7 @@ export const whatsappHelper = {
         type: "template",
         source: "external",
         template: {
-          name: "gc_donation_receipt_au",
+          name: "fellowship_payment_receipt",
           language: { code: "en" },
           components: [
             {
