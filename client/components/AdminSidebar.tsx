@@ -7,13 +7,11 @@ import {
   LayoutDashboard,
   CreditCard,
   Users,
-  Mail,
   Image,
   Video,
   FileText,
   Settings,
   LogOut,
-  BarChart3,
   Home,
   Briefcase,
   Award,
@@ -25,16 +23,13 @@ import {
   ChevronDown,
   ChevronRight,
   Shield,
-  ClipboardCheck,
   Clock,
   PlusCircle,
   History,
   UserPlus,
-  CheckCircle,
-  XCircle,
   Wallet,
+  BarChart3,
   Target,
-  Megaphone
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { logout } from '@/app/(admin-panel)/admin/login/actions';
@@ -74,8 +69,7 @@ const menuItems: MenuItem[] = [
   // Dashboard - All roles
   { icon: LayoutDashboard, label: 'Dashboard', href: '/admin', category: 'main', roles: ['super_admin', 'agent', 'approver', 'accounts'] },
 
-  // Super Admin Only - Analytics & Settings
-  { icon: BarChart3, label: 'Analytics', href: '/admin/analytics', category: 'main', roles: ['super_admin'] },
+  // Super Admin Only
   { icon: Users, label: 'Admin Users', href: '/admin/users', category: 'main', roles: ['super_admin'] },
 
   // CMS Content Management - Super Admin Only
@@ -113,12 +107,6 @@ const menuItems: MenuItem[] = [
   { icon: CreditCard, label: 'Campaign Payments', href: '/admin/campaigns/payments', category: 'campaigns', roles: ['super_admin', 'accounts', 'approver'] },
   { icon: BarChart3, label: 'Campaign Stats', href: '/admin/campaigns/stats', category: 'campaigns', roles: ['super_admin', 'accounts'] },
 
-  // Operations - Super Admin
-  { icon: Users, label: 'Volunteers', href: '/admin/volunteers', category: 'operations', roles: ['super_admin'] },
-  { icon: Mail, label: 'Contact Messages', href: '/admin/messages', category: 'operations', roles: ['super_admin'] },
-
-  // Settings - Super Admin Only
-  { icon: Settings, label: 'Settings', href: '/admin/settings', category: 'settings', roles: ['super_admin'] },
 ];
 
 function SidebarDropdown({ label, icon: Icon, items, currentPath }: { label: string; icon: any; items: MenuItem[]; currentPath: string }) {
@@ -234,8 +222,6 @@ export default function AdminSidebar() {
   const donationItems = filteredItems.filter(item => item.category === 'donations');
   const fellowshipItems = filteredItems.filter(item => item.category === 'fellowship');
   const campaignItems = filteredItems.filter(item => item.category === 'campaigns');
-  const operationsItems = filteredItems.filter(item => item.category === 'operations');
-  const settingsItems = filteredItems.filter(item => item.category === 'settings');
 
   return (
     <div className="w-72 bg-gradient-to-br from-primary via-primary to-primary/95 text-white min-h-screen flex flex-col shadow-2xl relative overflow-hidden">
@@ -312,29 +298,6 @@ export default function AdminSidebar() {
           />
         )}
 
-        {/* Operations Section - Super Admin */}
-        {operationsItems.length > 0 && (
-          <>
-            <div className="pt-4 pb-2">
-              <p className="text-xs font-semibold text-secondary/80 uppercase tracking-wider px-4 mb-2">Operations</p>
-            </div>
-            {operationsItems.map((item) => (
-              <SidebarLink key={item.href} item={item} currentPath={pathname} />
-            ))}
-          </>
-        )}
-
-        {/* Settings Section - Super Admin */}
-        {settingsItems.length > 0 && (
-          <>
-            <div className="pt-4 pb-2">
-              <p className="text-xs font-semibold text-secondary/80 uppercase tracking-wider px-4 mb-2">Settings</p>
-            </div>
-            {settingsItems.map((item) => (
-              <SidebarLink key={item.href} item={item} currentPath={pathname} />
-            ))}
-          </>
-        )}
       </nav>
 
       {/* User Info & Footer */}

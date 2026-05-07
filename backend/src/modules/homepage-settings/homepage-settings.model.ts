@@ -89,10 +89,10 @@ const HomepageSettingsSchema = new Schema<IHomepageSettingsDocument>({
   stats: {
     type: [StatItemSchema],
     default: [
-      { icon: 'Users', value: '400', suffix: 'k+', label: 'Total Visitors' },
-      { icon: 'HandHeart', value: '49', suffix: '', label: 'Bed Hospital' },
-      { icon: 'Activity', value: '15', suffix: '', label: 'Home Care Vehicles' },
-      { icon: 'Clock', value: '24/7', suffix: '', label: 'Emergency Care' },
+      { icon: 'HandHeart', value: '49', suffix: '', label: 'Hospital Beds' },
+      { icon: 'Ambulance', value: '15', suffix: '', label: 'Home Care Vehicles' },
+      { icon: 'Stethoscope', value: 'Free', suffix: '', label: 'Dialysis Services' },
+      { icon: 'Shield', value: '0', suffix: ' Bills', label: 'No-Bill Hospital' },
     ],
   },
 

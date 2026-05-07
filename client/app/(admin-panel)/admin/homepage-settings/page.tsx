@@ -58,10 +58,10 @@ const DEFAULT_SETTINGS: Settings = {
   quotePerson: 'Fr. Joy Koothur',
   quoteImage: '/image/FATHER.png',
   stats: [
-    { icon: 'Users', value: '400', suffix: 'k+', label: 'Total Visitors' },
-    { icon: 'HandHeart', value: '49', suffix: '', label: 'Bed Hospital' },
-    { icon: 'Activity', value: '15', suffix: '', label: 'Home Care Vehicles' },
-    { icon: 'Clock', value: '24/7', suffix: '', label: 'Emergency Care' },
+    { icon: 'HandHeart', value: '49', suffix: '', label: 'Hospital Beds' },
+    { icon: 'Ambulance', value: '15', suffix: '', label: 'Home Care Vehicles' },
+    { icon: 'Stethoscope', value: 'Free', suffix: '', label: 'Dialysis Services' },
+    { icon: 'Shield', value: '0', suffix: ' Bills', label: 'No-Bill Hospital' },
   ],
   servicesTitle: 'Our Services',
   servicesSubtitle: 'Comprehensive care and support for patients and their families, provided with radical compassion and zero cost.',
@@ -280,9 +280,9 @@ export default function HomepageSettingsPage() {
         </SectionCard>
 
         {/* Stats Section */}
-        <SectionCard title="Stats / Counter Section">
+        <SectionCard title="Hospital Stats / Key Facts">
           <p className="text-gray-500 text-sm mb-6">
-            The four stat boxes shown on the dark blue background. For numeric values (e.g. "400"), an animated counter is used. For text values (e.g. "24/7"), it is displayed as-is.
+            The stat boxes shown on the dark blue background. For numeric values (e.g. "49"), an animated counter is used. For text values (e.g. "Free"), it is displayed as-is. Defaults: Hospital Beds (49), Home Care Vehicles (15), Dialysis Services (Free), No-Bill Hospital (0 Bills).
           </p>
           <div className="space-y-4">
             {settings.stats.map((stat, index) => (
