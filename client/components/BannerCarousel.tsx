@@ -18,9 +18,14 @@ const DEFAULT_BANNER = {
   ctaLink: '/donate',
 };
 
-export default function BannerCarousel({ dbBanners }: { dbBanners: any[] }) {
+export default function BannerCarousel({ dbBanners, settings }: { dbBanners: any[]; settings?: any }) {
   // Use the first active banner from DB (image or video), fall back to default
   const activeBanner = dbBanners?.find(b => b.isActive !== false) || DEFAULT_BANNER;
+
+  // Derive hero stats from homepage settings, or use defaults
+  const heroStats = settings?.stats?.length
+    ? settings.stats.map((s: any) => ({ value: `${s.value}${s.suffix || ''}`, label: s.label }))
+    : undefined;
 
   return (
     <div className="relative">
@@ -36,6 +41,7 @@ export default function BannerCarousel({ dbBanners }: { dbBanners: any[] }) {
         ctaText={activeBanner.ctaText}
         ctaLink={activeBanner.ctaLink}
         thumbnailUrl={activeBanner.thumbnailUrl}
+        heroStats={heroStats}
       />
       <HeroEditor currentBanner={activeBanner} />
     </div>

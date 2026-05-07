@@ -102,7 +102,7 @@ export default async function Home() {
 
       <div className="flex flex-col min-h-screen bg-white">
         {/* Hero Section with Banner */}
-        <BannerCarousel dbBanners={banners} />
+        <BannerCarousel dbBanners={banners} settings={homepageSettings} />
 
         {/* About Section */}
         <section className="w-full py-20 md:py-32 bg-slate-50 relative overflow-hidden">

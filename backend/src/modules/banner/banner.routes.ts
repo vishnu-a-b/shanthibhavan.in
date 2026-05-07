@@ -19,7 +19,38 @@ interface BannerRequestBody {
   isActive?: boolean;
 }
 
-// SEED default banners
+// SEED default home hero banner
+router.post('/seed-home', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const homeCount = await Banner.countDocuments({ location: 'home' });
+    if (homeCount > 0) {
+      res.json({ success: true, message: 'Home banner already exists', count: homeCount });
+      return;
+    }
+    const homeBanner = {
+      title: 'Driven by People, Devoted to People.',
+      subtitle: 'Always Free. Always Compassionate.',
+      description: 'The first palliative hospital in India with a zero billing policy. Our mission is to provide dedicated palliative care and improve the quality of life for bedridden patients.',
+      tagline: 'Hold a Hand in the Darkest Hour',
+      taglineDescription: 'At Shanthibhavan, we provide dignity and comfort through free palliative care. Our doors stay open only because of hearts like yours.',
+      mediaType: 'video',
+      videoUrl: '/video/hero.mp4',
+      thumbnailUrl: '/image/hero.jpeg',
+      ctaText: 'Donate Now',
+      ctaLink: '/donate',
+      location: 'home',
+      order: 1,
+      isActive: true,
+    };
+    await Banner.create(homeBanner);
+    res.json({ success: true, message: 'Default home hero banner created' });
+  } catch (error) {
+    console.error('Error seeding home banner:', error);
+    res.status(500).json({ success: false, error: 'Failed to seed home banner' });
+  }
+});
+
+// SEED default benevity banners
 router.post('/seed', async (_req: Request, res: Response): Promise<void> => {
   try {
     const benevityCount = await Banner.countDocuments({ location: 'benevity' });

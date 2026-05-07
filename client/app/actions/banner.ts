@@ -89,6 +89,20 @@ export async function deleteBanner(id: string) {
   }
 }
 
+export async function seedHomeBanner() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/banner/seed-home`, {
+      method: 'POST',
+      cache: 'no-store',
+    });
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error seeding home banner:', error);
+    return { success: false, error: 'Failed to connect to backend' };
+  }
+}
+
 export async function seedBenevityBanners() {
   try {
     // Use API_BASE_URL directly, it already handles the backend location
