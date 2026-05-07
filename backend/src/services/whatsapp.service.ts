@@ -18,7 +18,7 @@ const getAuthToken = () =>
 
 const headers = () => ({
   accept: "application/json",
-  Authorization: getAuthToken(),
+  Authorization: `Bearer ${getAuthToken()}`,
   "Content-Type": "application/json",
 });
 
@@ -110,54 +110,62 @@ export const whatsappHelper = {
     pdfBuffer: any,
     filename: string = `receipt_${Date.now()}.pdf`
   ): Promise<string> => {
+    console.log(`[WhatsApp] sendDonationReceipt: to=${phoneNumber}, file=${filename}, bufferSize=${pdfBuffer?.length ?? 'N/A'}`);
     try {
       const pdfUrl = await whatsappHelper.uploadPDFToStorage(pdfBuffer, filename);
+      console.log(`[WhatsApp] PDF uploaded to: ${pdfUrl}`);
 
+      const payload = {
+        to: phoneNumber,
+        type: "template",
+        source: "external",
+        template: {
+          name: "gc_donation_receipt_au",
+          language: { code: "en" },
+          components: [
+            {
+              type: "header",
+              parameters: [
+                {
+                  type: "document",
+                  document: { link: pdfUrl, filename },
+                },
+              ],
+            },
+          ],
+        },
+        metaData: { custom_callback_data: "donation_receipt" },
+      };
+
+      console.log(`[WhatsApp] Sending to Omni API: ${JSON.stringify(payload)}`);
       const response = await axios.post<WhatsAppResponse>(
         OMNI_API_URL,
-        {
-          to: phoneNumber,
-          type: "template",
-          source: "external",
-          template: {
-            name: "gc_donation_receipt_au",
-            language: { code: "en" },
-            components: [
-              {
-                type: "header",
-                parameters: [
-                  {
-                    type: "document",
-                    document: { link: pdfUrl, filename },
-                  },
-                ],
-              },
-            ],
-          },
-          metaData: { custom_callback_data: "donation_receipt" },
-        },
+        payload,
         { headers: headers() }
       );
 
-      console.log("Donation receipt sent successfully!");
+      console.log(`[WhatsApp] Donation receipt sent successfully! messageId=${response.data.messageId}`);
 
       setTimeout(() => {
         try {
           const tempFilePath = path.join(__dirname, "../../public/temp", filename);
           if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
         } catch (cleanupError) {
-          console.warn("Could not clean up temporary file:", cleanupError);
+          console.warn("[WhatsApp] Could not clean up temporary file:", cleanupError);
         }
       }, 60000);
 
       return response.data.messageId;
     } catch (error) {
-      console.error("Error sending donation receipt:", error);
       if (axios.isAxiosError(error)) {
+        console.error(
+          `[WhatsApp] Omni API error: status=${error.response?.status}, data=${JSON.stringify(error.response?.data)}`
+        );
         throw new Error(
           error.response?.data?.message || "Failed to send donation receipt"
         );
       }
+      console.error("[WhatsApp] Unexpected error sending donation receipt:", error);
       throw new Error("Unexpected error occurred");
     }
   },

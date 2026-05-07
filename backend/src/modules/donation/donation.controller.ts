@@ -296,21 +296,33 @@ export const verifyRazorpayPayment = async (req: Request, res: Response): Promis
 
     // Send success email + WhatsApp receipt
     (async () => {
+      const donationId = donation._id;
+      const receiptNumber = donation.receiptNumber;
+      console.log(`[Receipt] Starting receipt delivery for donationId=${donationId}, receiptNumber=${receiptNumber}, phone=${donation.phone}, email=${donation.email}`);
+
       let receiptPdf: Buffer | undefined;
-      if (donation.receiptNumber) {
+      if (receiptNumber) {
         try {
+          console.log(`[Receipt] Building PDF for receiptNumber=${receiptNumber}`);
           receiptPdf = await buildReceiptBuffer({
             name: donation.donorName,
             amount: donation.amount,
             date: new Date(donation.createdAt).toLocaleDateString('en-IN'),
             phoneNo: donation.phone || '',
             address: donation.address || '',
+            email: donation.email,
             transactionNumber: razorpay_payment_id,
-            receiptNumber: donation.receiptNumber,
+            receiptNumber,
           });
-        } catch { /* pdf error is non-fatal */ }
+          console.log(`[Receipt] PDF built successfully, size=${receiptPdf.length} bytes`);
+        } catch (pdfErr) {
+          console.error(`[Receipt] PDF build failed for donationId=${donationId}:`, pdfErr);
+        }
+      } else {
+        console.warn(`[Receipt] No receiptNumber on donation ${donationId} — skipping PDF generation`);
       }
 
+      console.log(`[Receipt] Sending email to ${donation.email}`);
       emailService.sendDonationSuccess({
         email: donation.email,
         donorName: donation.donorName,
@@ -318,17 +330,24 @@ export const verifyRazorpayPayment = async (req: Request, res: Response): Promis
         currency: donation.currency,
         transactionId: razorpay_payment_id,
         donationType: donation.donationType,
-        receiptNumber: donation.receiptNumber,
+        receiptNumber,
         paymentMethod: 'razorpay',
         receiptPdf,
-      }).catch(err => console.error('Failed to send success email:', err));
+      }).then(ok => {
+        if (ok) console.log(`[Receipt] Email sent successfully to ${donation.email}`);
+        else console.warn(`[Receipt] Email send returned false for ${donation.email}`);
+      }).catch(err => console.error(`[Receipt] Email send failed for ${donation.email}:`, err));
 
-      if (donation.phone && receiptPdf && donation.receiptNumber) {
+      if (donation.phone && receiptPdf && receiptNumber) {
+        console.log(`[Receipt] Sending WhatsApp to ${donation.phone}`);
         whatsappHelper.sendDonationReceipt(
           donation.phone,
           receiptPdf,
-          `${donation.receiptNumber}.pdf`
-        ).catch(err => console.error('Failed to send WhatsApp receipt:', err));
+          `${receiptNumber}.pdf`
+        ).then(msgId => console.log(`[Receipt] WhatsApp sent successfully, messageId=${msgId}`))
+         .catch(err => console.error(`[Receipt] WhatsApp send failed for ${donation.phone}:`, err));
+      } else {
+        console.warn(`[Receipt] Skipping WhatsApp — phone=${donation.phone}, hasPdf=${!!receiptPdf}, receiptNumber=${receiptNumber}`);
       }
     })();
 
@@ -586,6 +605,7 @@ export const getOrGenerateReceipt = async (req: Request, res: Response): Promise
       date: new Date(donation.createdAt).toLocaleDateString('en-IN'),
       phoneNo: donation.phone || '',
       address: donation.address || '',
+      email: donation.email,
       transactionNumber: donation.transactionId || donation.gatewayOrderId || 'N/A',
       receiptNumber: donation.receiptNumber,
     });
@@ -622,6 +642,7 @@ export const downloadReceiptPublic = async (req: Request, res: Response): Promis
       date: new Date(donation.createdAt).toLocaleDateString('en-IN'),
       phoneNo: donation.phone || '',
       address: donation.address || '',
+      email: donation.email,
       transactionNumber: donation.transactionId || donation.gatewayOrderId || 'N/A',
       receiptNumber: donation.receiptNumber!,
     });
