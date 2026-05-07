@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { History, Download, Filter } from 'lucide-react';
 import { getValidAccessToken } from '../../login/actions';
+import DataTable, { TableColumn } from 'react-data-table-component';
 
 interface Donation {
   _id: string;
@@ -23,18 +24,51 @@ interface Donation {
 const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
 const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
 
+const customStyles = {
+  headRow: {
+    style: {
+      backgroundColor: '#f9fafb',
+      borderBottom: '1px solid #e5e7eb',
+    },
+  },
+  headCells: {
+    style: {
+      fontSize: '14px',
+      fontWeight: '600',
+      color: '#111827',
+      paddingLeft: '24px',
+      paddingRight: '24px',
+    },
+  },
+  cells: {
+    style: {
+      paddingLeft: '24px',
+      paddingRight: '24px',
+      paddingTop: '16px',
+      paddingBottom: '16px',
+    },
+  },
+  rows: {
+    style: {
+      '&:hover': {
+        backgroundColor: '#f9fafb',
+      },
+    },
+  },
+};
+
 export default function DonationHistoryPage() {
   const [donations, setDonations] = useState<Donation[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState({ approvalStatus: '' });
-  const [pagination, setPagination] = useState({ page: 1, total: 0, pages: 0 });
+  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, pages: 0 });
 
   const fetchHistory = async () => {
     try {
       const token = await getValidAccessToken();
       const params = new URLSearchParams({
         page: pagination.page.toString(),
-        limit: '20',
+        limit: pagination.limit.toString(),
         ...(filter.approvalStatus && { approvalStatus: filter.approvalStatus }),
       });
 
@@ -56,7 +90,7 @@ export default function DonationHistoryPage() {
 
   useEffect(() => {
     fetchHistory();
-  }, [pagination.page, filter]);
+  }, [pagination.page, pagination.limit, filter]);
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
@@ -66,6 +100,67 @@ export default function DonationHistoryPage() {
     };
     return styles[status] || 'bg-gray-100 text-gray-800';
   };
+
+  const columns: TableColumn<Donation>[] = [
+    {
+      name: 'Receipt #',
+      cell: (row) => (
+        <span className="font-mono text-sm text-gray-900">{row.receiptNumber || '-'}</span>
+      ),
+    },
+    {
+      name: 'Donor',
+      cell: (row) => (
+        <div>
+          <p className="font-medium text-gray-900">{row.donorName}</p>
+          <p className="text-sm text-gray-500">{row.email}</p>
+        </div>
+      ),
+      minWidth: '180px',
+    },
+    {
+      name: 'Amount',
+      cell: (row) => (
+        <span className="font-semibold text-gray-900">
+          {row.currency} {row.amount.toLocaleString()}
+        </span>
+      ),
+      sortable: true,
+      selector: (row) => row.amount,
+    },
+    {
+      name: 'Method',
+      cell: (row) => (
+        <span className="capitalize text-gray-700">
+          {row.offlinePaymentMethod?.replace('_', ' ') || '-'}
+        </span>
+      ),
+    },
+    {
+      name: 'Status',
+      cell: (row) => (
+        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(row.approvalStatus)}`}>
+          {row.approvalStatus}
+        </span>
+      ),
+    },
+    {
+      name: 'Added By',
+      cell: (row) => (
+        <span className="text-gray-600">{row.addedBy?.username || '-'}</span>
+      ),
+    },
+    {
+      name: 'Date',
+      cell: (row) => (
+        <span className="text-gray-600">
+          {new Date(row.createdAt).toLocaleDateString('en-IN')}
+        </span>
+      ),
+      sortable: true,
+      selector: (row) => row.createdAt,
+    },
+  ];
 
   return (
     <div className="p-8">
@@ -102,80 +197,23 @@ export default function DonationHistoryPage() {
         </div>
       </div>
 
-      {/* Table */}
+      {/* DataTable */}
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        {loading ? (
-          <div className="p-8 text-center text-gray-500">Loading...</div>
-        ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Receipt #</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Donor</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Amount</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Method</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Added By</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Date</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {donations.map((donation) => (
-                <tr key={donation._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 font-mono text-sm text-gray-900">
-                    {donation.receiptNumber || '-'}
-                  </td>
-                  <td className="px-6 py-4">
-                    <p className="font-medium text-gray-900">{donation.donorName}</p>
-                    <p className="text-sm text-gray-500">{donation.email}</p>
-                  </td>
-                  <td className="px-6 py-4 font-semibold text-gray-900">
-                    {donation.currency} {donation.amount.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4 capitalize text-gray-700">
-                    {donation.offlinePaymentMethod?.replace('_', ' ') || '-'}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(donation.approvalStatus)}`}>
-                      {donation.approvalStatus}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {donation.addedBy?.username || '-'}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {new Date(donation.createdAt).toLocaleDateString('en-IN')}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-
-        {/* Pagination */}
-        {pagination.pages > 1 && (
-          <div className="px-6 py-4 border-t flex items-center justify-between">
-            <p className="text-sm text-gray-600">
-              Page {pagination.page} of {pagination.pages}
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
-                disabled={pagination.page === 1}
-                className="px-4 py-2 border rounded-lg disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <button
-                onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
-                disabled={pagination.page === pagination.pages}
-                className="px-4 py-2 border rounded-lg disabled:opacity-50"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-        )}
+        <DataTable
+          columns={columns}
+          data={donations}
+          progressPending={loading}
+          progressComponent={<div className="py-12 text-gray-500">Loading...</div>}
+          noDataComponent={<div className="py-12 text-gray-500">No history found.</div>}
+          pagination
+          paginationServer
+          paginationTotalRows={pagination.total}
+          paginationDefaultPage={pagination.page}
+          paginationPerPage={pagination.limit}
+          onChangePage={(page) => setPagination(prev => ({ ...prev, page }))}
+          onChangeRowsPerPage={(newLimit) => setPagination(prev => ({ ...prev, limit: newLimit, page: 1 }))}
+          customStyles={customStyles}
+        />
       </div>
     </div>
   );

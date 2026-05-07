@@ -56,12 +56,13 @@ class EmailService {
 
   async sendEmail(options: EmailOptions): Promise<boolean> {
     if (!this.transporter) {
-      console.warn('Email transporter not configured. Skipping email:', options.subject);
+      console.warn(`[Email] Transporter not configured. Skipping email to ${options.to}: ${options.subject}`);
       return false;
     }
 
+    console.log(`[Email] Attempting to send "${options.subject}" to ${options.to}, attachments=${options.attachments?.length ?? 0}`);
     try {
-      await this.transporter.sendMail({
+      const info = await this.transporter.sendMail({
         from: `"${this.fromName}" <${this.fromEmail}>`,
         to: options.to,
         subject: options.subject,
@@ -69,10 +70,10 @@ class EmailService {
         text: options.text || options.html.replace(/<[^>]*>/g, ''),
         attachments: options.attachments
       });
-      console.log('Email sent successfully to:', options.to);
+      console.log(`[Email] Sent successfully to ${options.to}, messageId=${info.messageId}`);
       return true;
     } catch (error) {
-      console.error('Failed to send email:', error);
+      console.error(`[Email] Failed to send to ${options.to}:`, error);
       return false;
     }
   }

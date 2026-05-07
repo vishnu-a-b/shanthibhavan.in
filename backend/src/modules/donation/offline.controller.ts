@@ -182,60 +182,81 @@ export const approveOfflinePayment = async (req: Request, res: Response): Promis
 
     // Generate receipt PDF, save to file, send email + WhatsApp
     (async () => {
-      if (donation.receiptNumber) {
-        let receiptPdf: Buffer | undefined;
+      const donationId = donation._id;
+      const receiptNumber = donation.receiptNumber;
+      console.log(`[Receipt] Starting offline approval receipt delivery for donationId=${donationId}, receiptNumber=${receiptNumber}, phone=${donation.phone}, email=${donation.email}`);
 
-        try {
-          const campaignName = donation.campaignId
-            ? (await Campaign.findById(donation.campaignId).select('title'))?.title
-            : undefined;
+      if (!receiptNumber) {
+        console.warn(`[Receipt] No receiptNumber on donation ${donationId} — skipping receipt delivery`);
+        return;
+      }
 
-          const receiptUrl = await saveReceiptToFile({
-            name: donation.donorName,
-            amount: donation.amount,
-            date: new Date(donation.createdAt).toLocaleDateString('en-IN'),
-            phoneNo: donation.phone || '',
-            address: donation.address || '',
-            transactionNumber: donation.offlinePaymentMethod || 'Offline',
-            receiptNumber: donation.receiptNumber,
-            programName: campaignName,
-          });
+      let receiptPdf: Buffer | undefined;
 
-          await Donation.findByIdAndUpdate(donation._id, {
-            receiptUrl,
-            receiptGenerated: true,
-          });
+      try {
+        const campaignName = donation.campaignId
+          ? (await Campaign.findById(donation.campaignId).select('title'))?.title
+          : undefined;
 
-          receiptPdf = await buildReceiptBuffer({
-            name: donation.donorName,
-            amount: donation.amount,
-            date: new Date(donation.createdAt).toLocaleDateString('en-IN'),
-            phoneNo: donation.phone || '',
-            address: donation.address || '',
-            transactionNumber: donation.offlinePaymentMethod || 'Offline',
-            receiptNumber: donation.receiptNumber,
-            programName: campaignName,
-          });
-        } catch (err) {
-          console.error('Receipt generation error (non-fatal):', err);
-        }
-
-        emailService.sendOfflineDonationApproved({
-          email: donation.email,
-          donorName: donation.donorName,
+        console.log(`[Receipt] Saving receipt PDF to file for receiptNumber=${receiptNumber}`);
+        const receiptUrl = await saveReceiptToFile({
+          name: donation.donorName,
           amount: donation.amount,
-          currency: donation.currency,
-          receiptNumber: donation.receiptNumber,
-          receiptPdf,
-        }).catch(err => console.error('Failed to send approval email:', err));
+          date: new Date(donation.createdAt).toLocaleDateString('en-IN'),
+          phoneNo: donation.phone || '',
+          address: donation.address || '',
+          email: donation.email,
+          transactionNumber: donation.offlinePaymentMethod || 'Offline',
+          receiptNumber,
+          programName: campaignName,
+        });
+        console.log(`[Receipt] Receipt saved to: ${receiptUrl}`);
 
-        if (donation.phone && receiptPdf) {
-          whatsappHelper.sendDonationReceipt(
-            donation.phone,
-            receiptPdf,
-            `${donation.receiptNumber}.pdf`
-          ).catch(err => console.error('Failed to send WhatsApp receipt:', err));
-        }
+        await Donation.findByIdAndUpdate(donation._id, {
+          receiptUrl,
+          receiptGenerated: true,
+        });
+
+        console.log(`[Receipt] Building PDF buffer for receiptNumber=${receiptNumber}`);
+        receiptPdf = await buildReceiptBuffer({
+          name: donation.donorName,
+          amount: donation.amount,
+          date: new Date(donation.createdAt).toLocaleDateString('en-IN'),
+          phoneNo: donation.phone || '',
+          address: donation.address || '',
+          email: donation.email,
+          transactionNumber: donation.offlinePaymentMethod || 'Offline',
+          receiptNumber,
+          programName: campaignName,
+        });
+        console.log(`[Receipt] PDF buffer built, size=${receiptPdf.length} bytes`);
+      } catch (err) {
+        console.error(`[Receipt] PDF generation error for donationId=${donationId}:`, err);
+      }
+
+      console.log(`[Receipt] Sending approval email to ${donation.email}`);
+      emailService.sendOfflineDonationApproved({
+        email: donation.email,
+        donorName: donation.donorName,
+        amount: donation.amount,
+        currency: donation.currency,
+        receiptNumber,
+        receiptPdf,
+      }).then(ok => {
+        if (ok) console.log(`[Receipt] Approval email sent successfully to ${donation.email}`);
+        else console.warn(`[Receipt] Approval email send returned false for ${donation.email}`);
+      }).catch(err => console.error(`[Receipt] Approval email failed for ${donation.email}:`, err));
+
+      if (donation.phone && receiptPdf) {
+        console.log(`[Receipt] Sending WhatsApp to ${donation.phone}`);
+        whatsappHelper.sendDonationReceipt(
+          donation.phone,
+          receiptPdf,
+          `${receiptNumber}.pdf`
+        ).then(msgId => console.log(`[Receipt] WhatsApp sent successfully, messageId=${msgId}`))
+         .catch(err => console.error(`[Receipt] WhatsApp send failed for ${donation.phone}:`, err));
+      } else {
+        console.warn(`[Receipt] Skipping WhatsApp — phone=${donation.phone}, hasPdf=${!!receiptPdf}`);
       }
     })();
 

@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Download, Eye, X, User, CreditCard, FileText, Building2 } from 'lucide-react';
 import { getValidAccessToken } from '../login/actions';
+import DataTable, { TableColumn } from 'react-data-table-component';
 
 interface Donation {
   _id: string;
@@ -45,6 +46,38 @@ interface DonationDetail extends Donation {
 const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5002';
 const API_URL = rawApiUrl.endsWith('/api') ? rawApiUrl.slice(0, -4) : rawApiUrl;
 
+const customStyles = {
+  headRow: {
+    style: {
+      backgroundColor: '#f9fafb',
+      borderBottom: '1px solid #e5e7eb',
+    },
+  },
+  headCells: {
+    style: {
+      fontSize: '14px',
+      fontWeight: '600',
+      color: '#111827',
+      paddingLeft: '24px',
+      paddingRight: '24px',
+    },
+  },
+  cells: {
+    style: {
+      paddingLeft: '24px',
+      paddingRight: '24px',
+      paddingTop: '16px',
+      paddingBottom: '16px',
+    },
+  },
+  rows: {
+    style: {
+      '&:hover': {
+        backgroundColor: '#f9fafb',
+      },
+    },
+  },
+};
 
 export default function DonationsPage() {
   return (
@@ -73,7 +106,7 @@ function DonationsPageInner() {
 
       const params = new URLSearchParams({
         page: pagination.page.toString(),
-        limit: '20',
+        limit: pagination.limit.toString(),
         ...(filter.status && { status: filter.status }),
         ...(filter.type && { donationType: filter.type }),
         ...(filter.startDate && { startDate: filter.startDate }),
@@ -107,7 +140,6 @@ function DonationsPageInner() {
   };
 
   const viewReceipt = async (donation: Donation) => {
-    // If already generated, open directly
     if (donation.receiptUrl) {
       window.open(donation.receiptUrl, '_blank');
       return;
@@ -123,7 +155,6 @@ function DonationsPageInner() {
       });
       const data = await res.json();
       if (data.success && data.receiptUrl) {
-        // Update local state so button reflects generated state immediately
         setDonations(prev =>
           prev.map(d => d._id === donation._id ? { ...d, receiptUrl: data.receiptUrl, receiptGenerated: true } : d)
         );
@@ -157,7 +188,7 @@ function DonationsPageInner() {
 
   useEffect(() => {
     fetchDonations();
-  }, [pagination.page, filter]);
+  }, [pagination.page, pagination.limit, filter]);
 
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
@@ -169,8 +200,81 @@ function DonationsPageInner() {
     return styles[status] || 'bg-gray-100 text-gray-800';
   };
 
-  const showingFrom = pagination.total === 0 ? 0 : (pagination.page - 1) * pagination.limit + 1;
-  const showingTo = Math.min(pagination.page * pagination.limit, pagination.total);
+  const columns: TableColumn<Donation>[] = [
+    {
+      name: 'Donor',
+      cell: (row) => (
+        <div>
+          <p className="font-medium text-gray-900">{row.donorName}</p>
+          <p className="text-sm text-gray-500">{row.email}</p>
+        </div>
+      ),
+      minWidth: '200px',
+    },
+    {
+      name: 'Amount',
+      cell: (row) => (
+        <span className="font-semibold text-gray-900">
+          {row.currency} {row.amount.toLocaleString()}
+        </span>
+      ),
+      sortable: true,
+      selector: (row) => row.amount,
+    },
+    {
+      name: 'Type',
+      cell: (row) => (
+        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.isOffline ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
+          {row.isOffline ? 'Offline' : 'Online'} - {row.donationType}
+        </span>
+      ),
+    },
+    {
+      name: 'Status',
+      cell: (row) => (
+        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(row.paymentStatus)}`}>
+          {row.paymentStatus}
+        </span>
+      ),
+    },
+    {
+      name: 'Date',
+      cell: (row) => (
+        <span className="text-gray-600">
+          {new Date(row.createdAt).toLocaleDateString('en-IN')}
+        </span>
+      ),
+      sortable: true,
+      selector: (row) => row.createdAt,
+    },
+    {
+      name: 'Actions',
+      cell: (row) => (
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => viewDetails(row._id)}
+            title="View full transaction details"
+            className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            Details
+          </button>
+          {row.paymentStatus === 'SUCCESS' && (
+            <button
+              onClick={() => viewReceipt(row)}
+              disabled={generatingReceipt === row._id}
+              title={row.receiptUrl ? 'View receipt' : 'Generate & view receipt'}
+              className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              <Eye className="w-3.5 h-3.5" />
+              {generatingReceipt === row._id ? 'Generating...' : row.receiptUrl ? 'Receipt' : 'Get Receipt'}
+            </button>
+          )}
+        </div>
+      ),
+      minWidth: '200px',
+    },
+  ];
 
   return (
     <div className="p-8">
@@ -224,14 +328,12 @@ function DonationsPageInner() {
             value={filter.startDate}
             onChange={(e) => setFilter({ ...filter, startDate: e.target.value })}
             className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
-            placeholder="Start Date"
           />
           <input
             type="date"
             value={filter.endDate}
             onChange={(e) => setFilter({ ...filter, endDate: e.target.value })}
             className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary"
-            placeholder="End Date"
           />
           {(filter.startDate || filter.endDate) && (
             <button
@@ -244,144 +346,37 @@ function DonationsPageInner() {
         </div>
       </div>
 
-      {/* Table */}
+      {/* DataTable */}
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
-        {loading ? (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                {['Donor', 'Amount', 'Type', 'Status', 'Date', 'Actions'].map(h => (
-                  <th key={h} className="px-6 py-4 text-left text-sm font-semibold text-gray-900">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {[...Array(6)].map((_, i) => (
-                <tr key={i}>
-                  <td className="px-6 py-4">
-                    <div className="h-4 bg-gray-200 rounded animate-pulse w-32 mb-1.5" />
-                    <div className="h-3 bg-gray-100 rounded animate-pulse w-44" />
-                  </td>
-                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded animate-pulse w-20" /></td>
-                  <td className="px-6 py-4"><div className="h-5 bg-gray-200 rounded-full animate-pulse w-24" /></td>
-                  <td className="px-6 py-4"><div className="h-5 bg-gray-200 rounded-full animate-pulse w-16" /></td>
-                  <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded animate-pulse w-20" /></td>
-                  <td className="px-6 py-4"><div className="h-7 bg-gray-200 rounded-lg animate-pulse w-16" /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : error ? (
+        {error ? (
           <div className="p-8 text-center text-red-600">{error}</div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-50 border-b">
-              <tr>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Donor</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Amount</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Type</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Status</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Date</th>
-                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {donations.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-12 text-center text-gray-500">No donations found.</td>
-                </tr>
-              ) : donations.map((donation) => (
-                <tr key={donation._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4">
-                    <div>
-                      <p className="font-medium text-gray-900">{donation.donorName}</p>
-                      <p className="text-sm text-gray-500">{donation.email}</p>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 font-semibold text-gray-900">
-                    {donation.currency} {donation.amount.toLocaleString()}
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${donation.isOffline ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}`}>
-                      {donation.isOffline ? 'Offline' : 'Online'} - {donation.donationType}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusBadge(donation.paymentStatus)}`}>
-                      {donation.paymentStatus}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">
-                    {new Date(donation.createdAt).toLocaleDateString('en-IN')}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => viewDetails(donation._id)}
-                        title="View full transaction details"
-                        className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-700 bg-gray-50 hover:bg-gray-100 border border-gray-200 rounded-lg transition-colors"
-                      >
-                        <FileText className="w-3.5 h-3.5" />
-                        Details
-                      </button>
-                      {donation.paymentStatus === 'SUCCESS' && (
-                        <button
-                          onClick={() => viewReceipt(donation)}
-                          disabled={generatingReceipt === donation._id}
-                          title={donation.receiptUrl ? 'View receipt' : 'Generate & view receipt'}
-                          className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          {generatingReceipt === donation._id ? 'Generating...' : donation.receiptUrl ? 'Receipt' : 'Get Receipt'}
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-
-        {/* Pagination */}
-        {pagination.total > 0 && (
-          <div className="px-6 py-4 border-t flex items-center justify-between">
-            <p className="text-sm text-gray-600">
-              Showing {showingFrom}–{showingTo} of {pagination.total} donations
-            </p>
-            {pagination.pages > 1 && (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
-                  disabled={pagination.page === 1}
-                  className="px-4 py-2 border rounded-lg disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                <button
-                  onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
-                  disabled={pagination.page === pagination.pages}
-                  className="px-4 py-2 border rounded-lg disabled:opacity-50"
-                >
-                  Next
-                </button>
-              </div>
-            )}
-          </div>
+          <DataTable
+            columns={columns}
+            data={donations}
+            progressPending={loading}
+            progressComponent={<div className="py-12 text-gray-500">Loading...</div>}
+            noDataComponent={<div className="py-12 text-gray-500">No donations found.</div>}
+            pagination
+            paginationServer
+            paginationTotalRows={pagination.total}
+            paginationDefaultPage={pagination.page}
+            paginationPerPage={pagination.limit}
+            onChangePage={(page) => setPagination(prev => ({ ...prev, page }))}
+            onChangeRowsPerPage={(newLimit) => setPagination(prev => ({ ...prev, limit: newLimit, page: 1 }))}
+            customStyles={customStyles}
+          />
         )}
       </div>
+
       {/* Transaction Details Modal */}
       {(loadingDetails || selectedDonation) && (
         <div className="fixed inset-0 z-50 flex items-start justify-end">
-          {/* Backdrop */}
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => { setSelectedDonation(null); setLoadingDetails(false); }}
           />
-
-          {/* Slide-in panel */}
           <div className="relative z-10 w-full max-w-xl h-full bg-white shadow-2xl overflow-y-auto">
-            {/* Header */}
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
               <h2 className="text-lg font-bold text-gray-900">Transaction Details</h2>
               <button
@@ -397,7 +392,6 @@ function DonationsPageInner() {
             ) : selectedDonation && (
               <div className="p-6 space-y-6">
 
-                {/* Donor Info */}
                 <section>
                   <div className="flex items-center gap-2 mb-3">
                     <User className="w-4 h-4 text-gray-400" />
@@ -412,7 +406,6 @@ function DonationsPageInner() {
                   </div>
                 </section>
 
-                {/* Donation Details */}
                 <section>
                   <div className="flex items-center gap-2 mb-3">
                     <CreditCard className="w-4 h-4 text-gray-400" />
@@ -428,7 +421,6 @@ function DonationsPageInner() {
                   </div>
                 </section>
 
-                {/* Transaction / Gateway Info */}
                 <section>
                   <div className="flex items-center gap-2 mb-3">
                     <Building2 className="w-4 h-4 text-gray-400" />
@@ -447,7 +439,6 @@ function DonationsPageInner() {
                   </div>
                 </section>
 
-                {/* Offline Workflow */}
                 {selectedDonation.isOffline && (
                   <section>
                     <div className="flex items-center gap-2 mb-3">
@@ -465,7 +456,6 @@ function DonationsPageInner() {
                   </section>
                 )}
 
-                {/* Receipt */}
                 <section>
                   <div className="flex items-center gap-2 mb-3">
                     <Eye className="w-4 h-4 text-gray-400" />
