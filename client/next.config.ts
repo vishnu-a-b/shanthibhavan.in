@@ -16,12 +16,12 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'api.gift.shanthibhavan.in',
+        hostname: 'api.shanthibhavan.in',
         pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'api.gift.shanthibhavan.in',
+        hostname: 'api.shanthibhavan.in',
         pathname: '/**',
       },
       {
