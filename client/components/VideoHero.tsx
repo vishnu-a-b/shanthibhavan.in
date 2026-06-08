@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Heart, ArrowRight, ChevronDown } from 'lucide-react';
@@ -41,6 +42,20 @@ export default function VideoHero({
   heroStats,
 }: VideoHeroProps) {
   const stats = heroStats?.length ? heroStats : DEFAULT_STATS;
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const handleTimeUpdate = () => {
+      if (video.currentTime >= 10) {
+        video.currentTime = 0;
+      }
+    };
+    video.addEventListener('timeupdate', handleTimeUpdate);
+    return () => video.removeEventListener('timeupdate', handleTimeUpdate);
+  }, []);
+
   return (
     <section
       className="relative w-full overflow-hidden flex flex-col"
@@ -56,6 +71,7 @@ export default function VideoHero({
         />
       ) : videoUrl ? (
         <video
+          ref={videoRef}
           autoPlay
           muted
           loop
