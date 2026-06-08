@@ -113,12 +113,36 @@ export const whatsappHelper = {
   sendDonationReceipt: async (
     phoneNumber: string,
     pdfBuffer: any,
-    filename: string = `receipt_${Date.now()}.pdf`
+    filename: string = `receipt_${Date.now()}.pdf`,
+    name: string = "",
+    amount: string = ""
   ): Promise<string> => {
     console.log(`[WhatsApp] sendDonationReceipt: to=${phoneNumber}, file=${filename}, bufferSize=${pdfBuffer?.length ?? "N/A"}`);
     try {
       const pdfUrl = await whatsappHelper.uploadPDFToStorage(pdfBuffer, filename);
       console.log(`[WhatsApp] PDF uploaded to: ${pdfUrl}`);
+
+      const components: object[] = [
+        {
+          type: "header",
+          parameters: [
+            {
+              type: "document",
+              document: { link: pdfUrl, filename },
+            },
+          ],
+        },
+      ];
+
+      if (name || amount) {
+        components.push({
+          type: "body",
+          parameters: [
+            { type: "text", text: name },
+            { type: "text", text: amount },
+          ],
+        });
+      }
 
       const payload = {
         to: phoneNumber,
@@ -127,17 +151,7 @@ export const whatsappHelper = {
         template: {
           name: "fellowship_payment_receipt",
           language: { code: "en" },
-          components: [
-            {
-              type: "header",
-              parameters: [
-                {
-                  type: "document",
-                  document: { link: pdfUrl, filename },
-                },
-              ],
-            },
-          ],
+          components,
         },
         metaData: { custom_callback_data: "donation_receipt" },
       };

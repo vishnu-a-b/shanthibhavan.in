@@ -343,7 +343,9 @@ export const verifyRazorpayPayment = async (req: Request, res: Response): Promis
         whatsappHelper.sendDonationReceipt(
           donation.phone,
           receiptPdf,
-          `${receiptNumber}.pdf`
+          `${receiptNumber}.pdf`,
+          donation.donorName,
+          `₹${donation.amount.toLocaleString('en-IN')}`
         ).then(msgId => console.log(`[Receipt] WhatsApp sent successfully, messageId=${msgId}`))
          .catch(err => console.error(`[Receipt] WhatsApp send failed for ${donation.phone}:`, err));
       } else {
