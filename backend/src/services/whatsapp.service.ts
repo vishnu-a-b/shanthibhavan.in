@@ -107,7 +107,7 @@ export const whatsappHelper = {
     }
     const filePath = path.join(tempDir, filename);
     fs.writeFileSync(filePath, pdfBuffer);
-    return `${(process.env.BACKEND_URL || "http://localhost:3003").replace(/\/$/, "")}/temp/${filename}`;
+    return `${(process.env.BACKEND_URL || "http://localhost:3003").replace(/\/$/, "")}/public/temp/${filename}`;
   },
 
   sendDonationReceipt: async (
