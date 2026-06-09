@@ -51,6 +51,7 @@ app.use((req, _res, next) => {
 
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace('://', '://www.') : undefined,
   'http://localhost:3000',
   'http://localhost:3005',
 ].filter(Boolean) as string[];
