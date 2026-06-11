@@ -129,7 +129,7 @@ class EmailService {
       <div class="receipt-box">
         <div class="receipt-header">
           <h2>Shanthibhavan Palliative Hospital</h2>
-          <p>Golden Hills, P.O, near PMS Dental College, Venkode, Vattappara, Thiruvananthapuram, Kerala 695028</p>
+          <p>Mountain of Mercy, Pallissery, Arattupuzha.P.O, Thrissur - 680562</p>
           <p>PAN: XXXXX0000X | 80G Reg No: XXXXX0000X/80G/XXXX-XX</p>
         </div>
 
