@@ -42,11 +42,8 @@ export default function ContactPage() {
                     <div>
                       <h3 className="font-bold text-lg mb-1">Address</h3>
                       <p className="text-muted-foreground">
-                        Shanthibhavan Palliative Hospital<br />
-                        Golden Hills, P.O<br />
-                        Near PMS Dental College, Venkode<br />
-                        Vattappara, Thiruvananthapuram<br />
-                        Kerala - 695028
+                       Mountain of Mercy, Pallissery,<br />
+                       Arattupuzha.P.O, Thrissur - 680562<br />
                       </p>
                     </div>
                  </div>
@@ -79,9 +76,9 @@ export default function ContactPage() {
               {/* Map Placeholder */}
               <div className="w-full h-48 md:h-64 bg-gradient-to-br from-secondary/50 to-secondary rounded-lg md:rounded-xl overflow-hidden shadow-inner border-2 border-secondary flex flex-col items-center justify-center">
                  <div className="text-5xl mb-3">📍</div>
-                 <span className="text-primary font-semibold mb-2">Golden Hills, Venkode</span>
-                 <span className="text-sm text-primary/80">Thiruvananthapuram - 695028</span>
-                 <a href="https://maps.google.com/?q=Shanthibhavan+Palliative+Hospital+Thiruvananthapuram" target="_blank" rel="noopener noreferrer" className="mt-3 text-xs text-primary hover:text-primary/80 underline">
+                 <span className="text-primary font-semibold mb-2">Mountain of Mercy, Pallissery,</span>
+                 <span className="text-sm text-primary/80">Arattupuzha.P.O, Thrissur - 680562</span>
+                 <a href="https://maps.app.goo.gl/NuSvgqBkBg38cFgQ6" target="_blank" rel="noopener noreferrer" className="mt-3 text-xs text-primary hover:text-primary/80 underline">
                    View on Google Maps →
                  </a>
               </div>
