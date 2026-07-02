@@ -1,4 +1,5 @@
 'use client';
+import React from 'react';
 import { MessageCircle } from 'lucide-react';
 import { event } from '@/lib/gtag';
 
@@ -32,7 +33,7 @@ const LinkedinIcon = () => (
   </svg>
 );
 
-const ICONS: Record<string, () => JSX.Element> = {
+const ICONS: Record<string, () => React.ReactElement> = {
   Facebook: FacebookIcon,
   Instagram: InstagramIcon,
   YouTube: YoutubeIcon,
