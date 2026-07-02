@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Card, CardContent } from '@/components/ui/Card';
 import { MapPin, Phone, Mail } from 'lucide-react';
+import { event } from '@/lib/gtag';
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);
@@ -18,6 +19,7 @@ export default function ContactPage() {
     setTimeout(() => {
       setLoading(false);
       setSuccess(true);
+      event('generate_lead', { event_category: 'contact_form' });
     }, 1500);
   };
 
@@ -78,7 +80,7 @@ export default function ContactPage() {
                  <div className="text-5xl mb-3">📍</div>
                  <span className="text-primary font-semibold mb-2">Mountain of Mercy, Pallissery,</span>
                  <span className="text-sm text-primary/80">Arattupuzha.P.O, Thrissur - 680562</span>
-                 <a href="https://maps.app.goo.gl/NuSvgqBkBg38cFgQ6" target="_blank" rel="noopener noreferrer" className="mt-3 text-xs text-primary hover:text-primary/80 underline">
+                 <a href="https://maps.app.goo.gl/qtn5hsKQXDduZ457A" target="_blank" rel="noopener noreferrer" onClick={() => event('click', { event_category: 'outbound', event_label: 'google_maps' })} className="mt-3 text-xs text-primary hover:text-primary/80 underline">
                    View on Google Maps →
                  </a>
               </div>

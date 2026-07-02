@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { event } from '@/lib/gtag';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
@@ -17,6 +18,7 @@ export default function VolunteerPage() {
     setTimeout(() => {
       setLoading(false);
       setSuccess(true);
+      event('generate_lead', { event_category: 'volunteer_form' });
     }, 1500);
   };
 

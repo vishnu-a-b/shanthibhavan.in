@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { X, Heart, Loader2, IndianRupee, ArrowRight, Users, Target } from 'lucide-react';
 import PhoneInput from 'react-phone-number-input';
+import { event } from '@/lib/gtag';
 import 'react-phone-number-input/style.css';
 
 interface Campaign {
@@ -111,6 +112,8 @@ export default function DonationModal({ isOpen, onClose, campaign }: DonationMod
         return;
       }
 
+      event('begin_checkout', { currency: 'INR', value: parseFloat(form.amount) });
+
       // Load Razorpay SDK
       const loaded = await loadRazorpay();
       if (!loaded) {
@@ -147,6 +150,11 @@ export default function DonationModal({ isOpen, onClose, campaign }: DonationMod
             const verifyData = await verifyRes.json();
 
             if (verifyData.success) {
+              event('purchase', {
+                currency: 'INR',
+                value: parseFloat(form.amount),
+                transaction_id: response.razorpay_payment_id,
+              });
               window.location.href = `/donate/success?orderId=${verifyData.orderId}&receiptNumber=${verifyData.receiptNumber}`;
             } else {
               alert('Payment verification failed. Please contact support.');
