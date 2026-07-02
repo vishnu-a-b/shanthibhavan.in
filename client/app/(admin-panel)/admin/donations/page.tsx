@@ -167,6 +167,58 @@ function DonationsPageInner() {
     }
   };
 
+  const exportCSV = async () => {
+    try {
+      const token = await getValidAccessToken();
+
+      const params = new URLSearchParams({
+        page: '1',
+        limit: '10000',
+        ...(filter.status && { status: filter.status }),
+        ...(filter.type && { donationType: filter.type }),
+        ...(filter.startDate && { startDate: filter.startDate }),
+        ...(filter.endDate && { endDate: filter.endDate }),
+        ...(filter.search && { search: filter.search }),
+      });
+
+      const res = await fetch(`${API_URL}/api/donation?${params}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+
+      if (!data.success) return;
+
+      const rows: Donation[] = data.donations;
+
+      const headers = ['Date', 'Donor Name', 'Email', 'Phone', 'Amount', 'Currency', 'Mode', 'Type', 'Status', 'Receipt Number'];
+      const csvLines = [
+        headers.join(','),
+        ...rows.map((d) => [
+          new Date(d.createdAt).toLocaleDateString('en-IN'),
+          `"${d.donorName.replace(/"/g, '""')}"`,
+          `"${d.email.replace(/"/g, '""')}"`,
+          d.phone || '',
+          d.amount,
+          d.currency,
+          d.isOffline ? 'Offline' : 'Online',
+          d.donationType,
+          d.paymentStatus,
+          d.receiptNumber || '',
+        ].join(',')),
+      ];
+
+      const blob = new Blob([csvLines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `donations_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('CSV export failed:', err);
+    }
+  };
+
   const viewDetails = async (donationId: string) => {
     setLoadingDetails(true);
     setSelectedDonation(null);
@@ -210,6 +262,13 @@ function DonationsPageInner() {
         </div>
       ),
       minWidth: '200px',
+    },
+    {
+      name: 'Phone',
+      cell: (row) => (
+        <span className="text-gray-700 text-sm">{row.phone || '—'}</span>
+      ),
+      minWidth: '130px',
     },
     {
       name: 'Amount',
@@ -284,9 +343,8 @@ function DonationsPageInner() {
           <p className="text-gray-600 mt-1">View and manage all donation records</p>
         </div>
         <button
-          disabled
-          title="CSV export coming soon"
-          className="flex items-center gap-2 px-4 py-2 bg-primary/40 text-white rounded-lg cursor-not-allowed"
+          onClick={exportCSV}
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
         >
           <Download className="w-4 h-4" />
           Export CSV
@@ -300,7 +358,7 @@ function DonationsPageInner() {
             type="text"
             value={filter.search}
             onChange={(e) => setFilter({ ...filter, search: e.target.value })}
-            placeholder="Search by name or email..."
+            placeholder="Search by name, email or phone..."
             className="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary flex-1 min-w-[200px]"
           />
           <select
@@ -400,7 +458,7 @@ function DonationsPageInner() {
                   <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
                     <Row label="Name" value={selectedDonation.donorName} />
                     <Row label="Email" value={selectedDonation.email} />
-                    {selectedDonation.phone && <Row label="Phone" value={`${selectedDonation.countryCode || ''} ${selectedDonation.phone}`} />}
+                    {selectedDonation.phone && <Row label="Phone" value={selectedDonation.phone} />}
                     {selectedDonation.address && <Row label="Address" value={selectedDonation.address} />}
                     {selectedDonation.panNumber && <Row label="PAN" value={selectedDonation.panNumber} />}
                   </div>

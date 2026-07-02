@@ -460,6 +460,7 @@ export const listDonations = async (req: Request, res: Response): Promise<void> 
       filter.$or = [
         { donorName: searchRegex },
         { email: searchRegex },
+        { phone: searchRegex },
       ];
     }
 
