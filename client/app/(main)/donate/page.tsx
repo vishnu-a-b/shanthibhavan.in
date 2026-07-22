@@ -89,7 +89,8 @@ function DonateContent() {
     panNumber: '',
     address: '',
     notes: '',
-    isAnonymous: false
+    isAnonymous: false,
+    wants80G: false
   });
 
   const [campaignForm, setCampaignForm] = useState({
@@ -98,7 +99,8 @@ function DonateContent() {
     amount: '',
     panNumber: '',
     address: '',
-    isAnonymous: false
+    isAnonymous: false,
+    wants80G: false
   });
 
   useEffect(() => {
@@ -450,21 +452,32 @@ function DonateContent() {
                         className="phone-input-custom"
                       />
                     </div>
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1.5">PAN Number <span className="text-xs text-gray-400">(for 80G receipt)</span></label>
-                        <Input
-                          value={generalForm.panNumber}
-                          onChange={(e) => {
-                            setGeneralPanError('');
-                            setGeneralForm({ ...generalForm, panNumber: e.target.value.toUpperCase() });
-                          }}
-                          placeholder="ABCDE1234F"
-                          maxLength={10}
-                          className="rounded-lg"
-                        />
-                        {generalPanError && <p className="text-red-500 text-xs mt-1">{generalPanError}</p>}
-                      </div>
+                    <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-700 font-medium">
+                      <input
+                        type="checkbox"
+                        checked={generalForm.wants80G}
+                        onChange={(e) => setGeneralForm({ ...generalForm, wants80G: e.target.checked, panNumber: '' })}
+                        className="w-4 h-4 rounded border-gray-300 text-primary"
+                      />
+                      Do you want 80-G Tax Exemption?
+                    </label>
+                    <div className={`grid gap-4 ${generalForm.wants80G ? 'md:grid-cols-2' : ''}`}>
+                      {generalForm.wants80G && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1.5">PAN Number <span className="text-xs text-gray-400">(for 80G receipt)</span></label>
+                          <Input
+                            value={generalForm.panNumber}
+                            onChange={(e) => {
+                              setGeneralPanError('');
+                              setGeneralForm({ ...generalForm, panNumber: e.target.value.toUpperCase() });
+                            }}
+                            placeholder="ABCDE1234F"
+                            maxLength={10}
+                            className="rounded-lg"
+                          />
+                          {generalPanError && <p className="text-red-500 text-xs mt-1">{generalPanError}</p>}
+                        </div>
+                      )}
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
                         <Input
@@ -700,21 +713,32 @@ function DonateContent() {
                               className="phone-input-custom"
                             />
                           </div>
-                          <div className="grid md:grid-cols-2 gap-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 mb-1.5">PAN Number <span className="text-xs text-gray-400">(for 80G receipt)</span></label>
-                              <Input
-                                value={campaignForm.panNumber}
-                                onChange={(e) => {
-                                  setCampaignPanError('');
-                                  setCampaignForm({ ...campaignForm, panNumber: e.target.value.toUpperCase() });
-                                }}
-                                placeholder="ABCDE1234F"
-                                maxLength={10}
-                                className="rounded-lg"
-                              />
-                              {campaignPanError && <p className="text-red-500 text-xs mt-1">{campaignPanError}</p>}
-                            </div>
+                          <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-700 font-medium">
+                            <input
+                              type="checkbox"
+                              checked={campaignForm.wants80G}
+                              onChange={(e) => setCampaignForm({ ...campaignForm, wants80G: e.target.checked, panNumber: '' })}
+                              className="w-4 h-4 rounded border-gray-300 text-primary"
+                            />
+                            Do you want 80-G Tax Exemption?
+                          </label>
+                          <div className={`grid gap-4 ${campaignForm.wants80G ? 'md:grid-cols-2' : ''}`}>
+                            {campaignForm.wants80G && (
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">PAN Number <span className="text-xs text-gray-400">(for 80G receipt)</span></label>
+                                <Input
+                                  value={campaignForm.panNumber}
+                                  onChange={(e) => {
+                                    setCampaignPanError('');
+                                    setCampaignForm({ ...campaignForm, panNumber: e.target.value.toUpperCase() });
+                                  }}
+                                  placeholder="ABCDE1234F"
+                                  maxLength={10}
+                                  className="rounded-lg"
+                                />
+                                {campaignPanError && <p className="text-red-500 text-xs mt-1">{campaignPanError}</p>}
+                              </div>
+                            )}
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1.5">Address</label>
                               <Input

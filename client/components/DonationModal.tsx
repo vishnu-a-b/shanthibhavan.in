@@ -50,7 +50,8 @@ export default function DonationModal({ isOpen, onClose, campaign }: DonationMod
     email: '',
     amount: '',
     panNumber: '',
-    address: ''
+    address: '',
+    wants80G: false
   });
 
   // Lock body scroll when modal is open
@@ -306,18 +307,29 @@ export default function DonationModal({ isOpen, onClose, campaign }: DonationMod
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                PAN Number
-              </label>
-              <Input
-                value={form.panNumber}
-                onChange={(e) => setForm({ ...form, panNumber: e.target.value.toUpperCase() })}
-                placeholder="For 80G receipt"
-                maxLength={10}
-              />
-            </div>
+          <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-700 font-medium">
+            <input
+              type="checkbox"
+              checked={form.wants80G}
+              onChange={(e) => setForm({ ...form, wants80G: e.target.checked, panNumber: '' })}
+              className="w-4 h-4 rounded border-gray-300 text-primary"
+            />
+            Do you want 80-G Tax Exemption?
+          </label>
+          <div className={`grid gap-4 ${form.wants80G ? 'grid-cols-2' : ''}`}>
+            {form.wants80G && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  PAN Number
+                </label>
+                <Input
+                  value={form.panNumber}
+                  onChange={(e) => setForm({ ...form, panNumber: e.target.value.toUpperCase() })}
+                  placeholder="For 80G receipt"
+                  maxLength={10}
+                />
+              </div>
+            )}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Address

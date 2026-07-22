@@ -17,6 +17,14 @@ export default function GoogleAnalytics() {
         gtag('js', new Date());
         gtag('config', '${GA_ID}', { page_path: window.location.pathname });
       `}</Script>
+      {/* Google Ads conversion tracking */}
+      <Script src="https://www.googletagmanager.com/gtag/js?id=AW-17581395753" strategy="afterInteractive" />
+      <Script id="gtag-ads-init" strategy="afterInteractive">{`
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'AW-17581395753');
+      `}</Script>
     </>
   );
 }
