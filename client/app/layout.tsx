@@ -47,10 +47,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <GoogleAnalytics />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${spaceGrotesk.variable} ${playfairDisplay.variable} antialiased min-h-screen flex flex-col`}
       >
-        <GoogleAnalytics />
         <SmoothScroll>
           <ScrollProgress />
           <NoiseOverlay />
